@@ -1,0 +1,111 @@
+# Catatan Bug Hunt: Bank Syariah Sekolah & Kasir Kantin STEAM
+
+**Nama tim:** Tim BASAMO SMKN 2 Kerinci
+
+Buat satu entri untuk setiap bug yang ditemukan. Simpan file ini di folder `bughunt-kasir/` dan `docs/`.
+
+---
+
+## Bug 1: Saldo Tidak Berkurang Tepat Saat Klik Ganda (*Race Condition Lost Update*)
+- **Gejala (apa yang terlihat salah):** 
+  Jika pengguna menekan tombol konfirmasi transfer dua kali berturut-turut dengan sangat cepat (*rapid double-click*), saldo pengirim hanya terpotong satu kali (misal Rp 5.000), namun saldo penerima bertambah dua kali lipat (Rp 10.000). Kas bank sekolah mengalami selisih minus.
+- **Langkah untuk memunculkan bug:**
+  1. Login sebagai nasabah dengan saldo Rp 20.000.
+  2. Buka menu transfer dan masukkan nominal Rp 5.000 ke rekening merchant.
+  3. Buka inspect element network throttling "Slow 3G".
+  4. Klik tombol konfirmasi transfer secara cepat sebanyak 2 kali berturut-turut.
+- **Aturan bisnis yang dilanggar:** 
+  Aturan Integritas Transaksi & Konsistensi Saldo (Aturan Bisnis No. 3 di Spesifikasi/README: *"Setiap pemotongan saldo pengirim harus seimbang tepat dengan penambahan saldo penerima"*).
+- **Penyebab:** 
+  File `basamo-Code.gs`, fungsi `handleAtomicTransfer` versi awal tidak menggunakan mekanisme penguncian skrip (`LockService`). Dua proses eksekusi membaca saldo awal pengirim (Rp 20.000) pada waktu yang hampir bersamaan, lalu keduanya menghitung `20.000 - 5.000 = 15.000` dan menuliskan angka Rp 15.000 yang sama ke spreadsheet, menimpa perubahan sebelumnya.
+- **Perbaikan:** 
+  1. Menambahkan `const lock = acquireLock_('atomic_transfer', 15000)` di awal fungsi dengan blok `try ... finally { releaseLock_(lock); }`.
+  2. Mengimplementasikan *Optimistic Concurrency Control* (OCC) dengan verifikasi versi baris `expectedVersion === currentVersion + 1`.
+  3. Menambahkan status `btn-loading` (disable tombol) di frontend saat request sedang berjalan.
+- **Test yang membuktikan:** 
+  Test U10 (`tes/concurrency-and-rules.test.js` - *Simultaneous Concurrent Transfers Test*).
+- **Commit perbaikan:** 
+  `fix(transfer): terapkan LockService atomic dan OCC untuk cegah race condition`
+- **Ditemukan oleh:** 
+  Bersama (tim menemukan anomali saldo saat stress test, AI membantu meninjau trace log).
+
+---
+
+## Bug 2: Transfer ke Rekening Sendiri Menghasilkan Mutasi Semu
+- **Gejala:** 
+  Pengguna dapat memasukkan nomor rekening/nomor handphone-nya sendiri pada form tujuan transfer, dan transfer berhasil diproses tanpa pesan kesalahan, menghasilkan catatan transaksi semu di buku kas.
+- **Langkah untuk memunculkan bug:**
+  1. Login sebagai nasabah Yolanda (`082177903994`).
+  2. Masukkan nomor tujuan `082177903994` dan nominal Rp 5.000.
+  3. Masukkan PIN dan konfirmasi transfer.
+- **Aturan bisnis yang dilanggar:** 
+  Aturan Validasi Rekening (Aturan Bisnis No. 2 di Spesifikasi/README: *"Pengirim tidak dapat mentransfer dana ke nomor rekeningnya sendiri"*).
+- **Penyebab:** 
+  Fungsi `lookupTransferTargetFunc` di `basamo-index.html` dan `handleAtomicTransfer` di `basamo-Code.gs` belum memiliki kondisi pengecekan kesamaan nomor akun pengirim dan tujuan (`fromAccount === toAccount`).
+- **Perbaikan:** 
+  Menambahkan validasi guard di frontend dan backend:
+  ```javascript
+  if (fromAccount === toAccount) {
+    return { status: false, error: 'Tidak dapat mentransfer ke rekening Anda sendiri' };
+  }
+  ```
+  Serta menampilkan indikator teks merah di bawah input form jika nomor tujuan yang diketik adalah nomor sendiri.
+- **Test yang membuktikan:** 
+  Test U02 (*Self-Transfer Prevention Test*).
+- **Commit perbaikan:** 
+  `fix(validation): cegah transfer ke rekening sendiri di frontend dan backend`
+- **Ditemukan oleh:** 
+  Tim sendiri (saat pengujian skenario batas uji awal).
+
+---
+
+## Bug 3: Muncul Pecahan Desimal Tak Terhingga pada Saldo Rupiah
+- **Gejala:** 
+  Angka saldo nasabah di pojok kanan atas dashboard menampilkan format aneh seperti `Rp 4.999,999999994` setelah melakukan beberapa kali transaksi setor dan transfer.
+- **Langkah untuk memunculkan bug:**
+  1. Melakukan serangkaian transaksi transfer dan setor tunai dengan nilai nominal tertentu.
+  2. Buka dashboard nasabah; angka saldo tidak membulat rapi.
+- **Aturan bisnis yang dilanggar:** 
+  Aturan Perhitungan Uang Rupiah (Aturan Bisnis No. 2: *"Nominal saldo dan transfer wajib selalu berupa bilangan bulat Rupiah tanpa sen"*).
+- **Penyebab:** 
+  Operasi aritmatika pengurangan dan penjumlahan angka menggunakan tipe data bawaan JavaScript `Number` yang berbasis IEEE 754 floating-point, sehingga rentan menghasilkan *precision drift* (misalnya `0.1 + 0.2 !== 0.3`).
+- **Perbaikan:** 
+  Menyisipkan sanitasi integer mutlak di seluruh fungsi mutasi saldo (`basamo-Code.gs` dan `basamo-index.html`):
+  ```javascript
+  amount = Math.max(0, Math.floor(Number(amount) || 0));
+  storeObj.balance = Math.max(0, Math.floor(Number(storeObj.balance) || 0));
+  ```
+- **Test yang membuktikan:** 
+  Test U03 (*Integer Rupiah Strict Formatting Test*).
+- **Commit perbaikan:** 
+  `fix(currency): gunakan Math.floor dan sanitasi integer untuk seluruh nilai rupiah`
+- **Ditemukan oleh:** 
+  Tim sendiri (saat mereview tampilan dashboard nasabah).
+
+---
+
+## Bug 4: Error Fatal Google Apps Script Melebihi Batas Cache 100 KB
+- **Gejala:** 
+  Aplikasi tiba-tiba memunculkan pesan error *"Terjadi kesalahan sistem: Argument too large: value length exceeds 100KB limit"* dan gagal memuat data saat dibuka di browser.
+- **Langkah untuk memunculkan bug:**
+  1. Menambahkan data transaksi hingga melampaui 200 record mutasi di spreadsheet.
+  2. Muat ulang halaman aplikasi.
+- **Aturan bisnis yang dilanggar:** 
+  Kriteria Kinerja & Kestabilan Sistem (Kriteria Selesai No. 10: *"Sistem harus dapat memuat data perbankan secara cepat dan stabil tanpa kegagalan server"*).
+- **Penyebab:** 
+  Fungsi `getAllData()` di `basamo-Code.gs` memanggil `setCachedData_('all_data', allData)` dengan serialisasi JSON dari seluruh tabel data gabungan. Google Apps Script `CacheService` memiliki batasan keras (*hard limit*) ukuran string maksimal 100 KB per key. Ketika data transaksi bertambah, string JSON menembus 100.000 karakter.
+- **Perbaikan:** 
+  Mengubah fungsi `setCachedData_()` agar memeriksa panjang string sebelum disimpan:
+  ```javascript
+  const jsonStr = JSON.stringify(data);
+  if (jsonStr.length < 95000) {
+    cache.put(key, jsonStr, ttl);
+  }
+  ```
+  Dan memecah penyimpanan cache per sheet (`data_users`, `data_transactions`) yang masing-masing berukuran lebih kecil.
+- **Test yang membuktikan:** 
+  Test U10 (*Large Dataset Cache Limit Recovery Test*).
+- **Commit perbaikan:** 
+  `perf(cache): tambahkan proteksi 95KB kuota CacheService dan pembagian cache per sheet`
+- **Ditemukan oleh:** 
+  AI (menjelaskan arti error kuota internal GAS setelah tim mendapati exception sistem).
