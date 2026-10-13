@@ -14,4 +14,3 @@ Menolak saran AI dengan alasan yang jelas adalah hal yang baik.
 | 4 | Menambahkan proteksi *Print CSS* khusus (@media print) agar struk transaksi tercetak presisi di kertas A4 tanpa elemen UI browser | **Diterima** | Sangat penting untuk keabsahan operasional loket sekolah agar siswa dan kasir toko mendapatkan bukti cetak fisik yang bersih tanpa tombol, header navigasi, atau background gelap. | Penambahan blok `@media print` lengkap dengan `table`, `thead`, `page-break-inside: avoid` pada tag `<style>` di `basamo-index.html`. |
 | 5 | Mengenkripsi PIN dan kata sandi menggunakan hash satu arah SHA-256 sebelum disimpan ke database | **Diterima** | Melindungi privasi nasabah siswa dan staf agar kredensial PIN dan password tidak terbaca dalam bentuk teks polos (*plaintext*) oleh staf pengelola spreadsheet. | Penambahan modul hashing kredensial pada alur pendaftaran dan verifikasi login/PIN. |
 
-Penjelasan kode ditulis terpisah di `08-penjelasan-kode.md`.
