@@ -1,0 +1,106 @@
+# Spesifikasi Produk
+
+**Nama tim:** Tim BASAMO SMKN 2 Kerinci  
+**Nama produk:** BSS - Bank Syariah Sekolah (BASAMO)  
+**Alur inti yang dibangun:** Nasabah (siswa atau warga sekolah) login, mengecek saldo, dan mentransfer dana secara *cashless* dengan verifikasi PIN 6 digit ke akun merchant kantin/UP Pertokoan AKL atau sesama nasabah, sementara teller melayani setor/tarik tunai dan direktur memantau arus kas sekolah secara real-time.
+
+---
+
+## 1. Masalah
+1. **Risiko Kehilangan Uang Saku:** Siswa sering membawa uang tunai fisik yang rawan hilang, tercecer, atau rusak saat beraktivitas di lingkungan sekolah.
+2. **Antrean Panjang di Jam Istirahat:** Transaksi tunai di Unit Produksi (UP) Pertokoan AKL dan kantin memakan waktu lama karena kendala mencari uang kembalian pecahan kecil.
+3. **Pencatatan Keuangan Manual:** Bank mini sekolah sebelumnya mencatat transaksi tabungan siswa secara manual pada buku besar fisik, memicu lambatnya rekonsiliasi kas dan potensi kesalahan pencatatan.
+4. **Literasi Keuangan Digital Terbatas:** Siswa membutuhkan sarana praktik nyata perbankan mikro syariah yang aman, transparan, dan bebas riba di lingkungan sekolah.
+
+---
+
+## 2. Pengguna
+1. **Nasabah Pelajar (Siswa SMKN 2 Kerinci - Jurusan AKL, TSM, dll.):** Memeriksa saldo uang saku, mentransfer dana untuk jajan/belanja di UP Pertokoan AKL, melihat mutasi pengeluaran, dan mengelola PIN rekening.
+2. **Nasabah Umum (Guru & Tenaga Kependidikan):** Menyimpan saldo tabungan dan melakukan transfer pembayaran dengan limit yang lebih fleksibel.
+3. **Merchant (UP Pertokoan AKL / Kantin Sekolah):** Menerima pembayaran non-tunai secara instan dari siswa/guru, mengecek daftar transaksi masuk, dan mencetak rekap penjualan harian.
+4. **Teller:** Melayani loket fisik penyetoran tunai (cash deposit) dan penarikan tunai nasabah dengan verifikasi identitas.
+5. **Customer Service (CS):** Melayani pembukaan rekening nasabah baru dan pemutakhiran data nasabah.
+6. **Admin:** Mengelola master data pengguna, status aktivasi akun, dan membuka blokir akun nasabah yang lupa PIN.
+7. **Direktur (Pimpinan Sekolah/BSS):** Mengawasi total likuiditas kas, mengaudit buku besar transaksi, dan mengonfigurasi parameter sistem (limit transfer harian & profil instansi).
+
+---
+
+## 3. Hasil Wawancara Calon Pengguna
+
+- **Narasumber 1:** Siswa Kelas X AKL (Calon Nasabah Pelajar)  
+  *Cara wawancara:* Wawancara tatap muka langsung di laboratorium mini bank sekolah.  
+- **Narasumber 2:** Guru Pengelola UP Pertokoan AKL (Merchant Sekolah)  
+  *Cara wawancara:* Wawancara tatap muka di lokasi toko sekolah.
+
+| Pertanyaan kami | Jawaban narasumber |
+|---|---|
+| Apa kendala terbesar saat transaksi belanja di sekolah selama ini? | *"Siswa sering membawa uang pecahan besar (Rp 50.000 / Rp 100.000) untuk belanja Rp 3.000, kasir sering kehabisan uang kembalian receh sehingga antrean macet."* (Pengelola UP Pertokoan) |
+| Bagaimana keamanan uang saku siswa selama berada di sekolah? | *"Sering terjadi uang tercecer saat pelajaran olahraga atau praktik bengkel/lab. Kalau ada tabungan digital di sekolah, uang saku jauh lebih aman."* (Siswa X AKL) |
+| Fitur apa yang paling penting agar aplikasi dipercaya oleh siswa? | *"Harus ada proteksi PIN rahasia saat kirim uang, bisa cek saldo kapan saja lewat HP, dan ada bukti/struk transaksi yang jelas."* (Siswa X AKL) |
+| Apa kebutuhan pengelola bank mini sekolah? | *"Setor tunai harus cepat, pencatatan otomatis tanpa selisih kas, ada pembedaan limit belanja pelajar agar siswa tidak konsumtif, dan data tersimpan aman."* (Pengelola UP Pertokoan) |
+
+*Persona Pengguna:*
+- **Persona Siswa (Pelajar):** Generasi muda pengguna smartphone yang membutuhkan kemudahan transaksi jajan harian tanpa uang tunai fisik, namun membutuhkan pembatasan belanja harian agar tidak boros.
+- **Persona Kasir/Teller:** Staf akuntansi yang membutuhkan antarmuka cepat, validasi otomatis, dan pencegahan kesalahan entri angka uang.
+
+---
+
+## 4. Fitur Wajib (Hanya untuk Alur Inti)
+1. **Autentikasi & Multi-Role Authorization:** Sistem login berbasis peran (Nasabah, Teller, CS, Admin, Direktur) menggunakan nomor handphone/username dan kata sandi.
+2. **Dashboard & Cek Saldo Real-Time:** Penayangan saldo terkini, nomor rekening, kategori nasabah, dan riwayat transaksi terakhir.
+3. **Transfer Antar-Rekening & Merchant:** Pengiriman saldo instan dengan pencarian rekening tujuan otomatis (*lookup debounced*), validasi anti-transfer rekening sendiri, dan konfirmasi PIN 6 digit.
+4. **Layanan Loket Teller (Setor & Tarik Tunai):** Modul loket bagi teller untuk memproses setoran kas masuk dan penarikan kas nasabah dengan pencatatan nama teller.
+5. **Riwayat Mutasi & Cetak Slip Transaksi:** Pelacakan mutasi debit/kredit, filter riwayat, dan dukungan cetak slip struk A4 portrait terstandarisasi.
+6. **Manajemen Limit & Proteksi Akun:** Penerapan batas maksimal transfer harian (Pelajar: Rp 20.000, Umum: Rp 500.000) dan penguncian otomatis akun setelah 3 kali salah PIN.
+
+---
+
+## 5. Di Luar Cakupan (Tidak Dikerjakan dalam Challenge Ini)
+- Integrasi Payment Gateway perbankan nasional pihak ketiga (BI-FAST, ATM Bersama, Midtrans, QRIS Nasional).
+- Fitur pinjaman online atau kredit berbunga (karena berprinsip syariah murni non-riba).
+- Aplikasi native mobile Android/iOS (fokus pada Progressive Responsive Web App berbasis SPA).
+- Fitur kartu debit fisik berbasis NFC/RFID (saat ini transaksi berbasis nomor rekening/HP dan PIN digital).
+
+---
+
+## 6. Aturan Bisnis dan Perhitungan
+1. **Limit Transfer Harian:**
+   - Kategori Pelajar: Maksimal akumulasi transfer Rp 20.000 per hari kalender.
+   - Kategori Umum: Maksimal akumulasi transfer Rp 500.000 per hari kalender.
+   - Perhitungan akumulasi harian: `Total_Hari_Ini = SUM(transaksi_transfer_sukses_hari_ini) + nominal_transfer_baru <= limit_kategori`.
+2. **Validasi Rekening & Nominal:**
+   - Rekening pengirim dan rekening penerima tidak boleh sama (`from_account !== to_account`).
+   - Nominal transfer harus berupa bilangan bulat positif (`amount > 0` dan `amount === Math.floor(amount)`).
+   - Saldo pengirim harus mencukupi: `saldo_pengirim >= nominal_transfer`.
+3. **Prinsip Transaksi Atomik (All-or-Nothing):**
+   - Pemotongan saldo pengirim dan penambahan saldo penerima dieksekusi secara atomik menggunakan Optimistic Concurrency Control (OCC) dan `LockService`.
+   - Jika penambahan saldo penerima gagal, pemotongan saldo pengirim harus di-rollback secara otomatis ke nilai semula.
+4. **Ketentuan Keamanan PIN:**
+   - PIN terdiri dari 6 digit angka numerik.
+   - Setiap kali salah memasukkan PIN, counter `pin_attempts` bertambah 1.
+   - Jika `pin_attempts >= 3`, akun nasabah otomatis diblokir (`blocked = true`) dan hanya dapat dipulihkan oleh Admin/Direktur.
+
+---
+
+## 7. Data yang Disimpan
+
+| Data | Contoh Isi | Disimpan di Mana |
+|---|---|---|
+| Master Pengguna (`users`) | `{"__backendId": "dd01be...", "name": "Yolanda Ditiya", "phone": "082177903994", "role": "nasabah", "category": "pelajar", "kelas": "X AKL", "balance": 500, "pin": "123456", "blocked": false, "pin_attempts": 0}` | Google Sheets sheet `users` / LocalStorage `bss_data` |
+| Riwayat Transaksi (`transactions`) | `{"__backendId": "a51b19...", "transaction_type": "transfer", "amount": 1000, "from_account": "082210887419", "to_account": "085266778899", "from_name": "adelia fitri", "to_name": "UP Pertokoan AKL", "description": "Roma malkist chocolate", "created_at": "2026-08-20T01:57:47.043Z"}` | Google Sheets sheet `transactions` / LocalStorage `bss_data` |
+| Pengaturan Sistem (`settings`) | `{"type": "settings", "max_transfer_pelajar": 20000, "max_transfer_umum": 500000, "app_title": "Bank Syariah Sekolah", "school_name": "SMKN 2 KERINCI"}` | Google Sheets sheet `settings` / LocalStorage `bss_data` |
+| Notifikasi Transaksi (`notifications`) | `{"type": "notification", "recipient": "082177903994", "title": "Transfer Berhasil", "message": "Anda telah mentransfer Rp 5.000 ke UP Pertokoan AKL", "timestamp": "2026-08-26T03:54:28.751Z"}` | Google Sheets sheet `notifications` / LocalStorage `bss_data` |
+
+---
+
+## 8. Kriteria "Selesai" (Definition of Done)
+- [x] Pengguna dapat login sesuai hak akses perannya (Nasabah, Teller, CS, Admin, Direktur).
+- [x] Nasabah dapat melihat informasi saldo tabungan dan mutasi terkini secara akurat.
+- [x] Nasabah dapat melakukan transfer ke akun nasabah/merchant lain dengan verifikasi PIN 6 digit.
+- [x] Sistem menolak transfer jika saldo tidak mencukupi atau nominal tidak valid.
+- [x] Sistem menolak transfer ke rekening sendiri dengan pesan peringatan yang jelas.
+- [x] Sistem menolak transfer yang melampaui batas akumulasi harian (Rp 20.000 untuk pelajar).
+- [x] Akun terkunci otomatis setelah 3 kali gagal memasukkan PIN berturut-turut.
+- [x] Teller dapat memproses setor tunai dan saldo nasabah langsung bertambah saat itu juga.
+- [x] Riwayat transaksi tersimpan lengkap dan dapat dicetak dalam format slip struk standar.
+- [x] Sistem bekerja secara stabil baik di lingkungan Google Apps Script maupun mode offline preview local storage.
