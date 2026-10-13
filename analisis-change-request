@@ -1,0 +1,44 @@
+# Analisis Change Request
+
+Isi bagian ini **sebelum** mengubah kode, lalu commit dan push (contoh pesan: `dokumen: analisis change request`). Juri memeriksa bahwa commit ini muncul sebelum commit perubahan kode.
+
+**Change request:** Pencarian, filter, dan ekspor CSV pada riwayat transaksi dan buku kas (Tugas 3 di lembar challenge STEAMpreneur).
+
+**Kriteria penerimaan yang akan dipenuhi dan cara kami memenuhinya:**
+1. **Fitur Pencarian (Search):** Pengguna (nasabah/staff/direktur) dapat mencari mutasi berdasarkan kata kunci: nama pengirim, nama penerima, keterangan belanja, atau nomor rekening/telepon secara *real-time* (instan tanpa refresh).
+   - *Cara pemenuhan:* Menambahkan input pencarian dengan *debounce 250ms* yang memfilter array `transactions` di memori berdasarkan pencocokan substring `toLowerCase()`.
+2. **Fitur Filter Berjenjang:** Pengguna dapat memfilter mutasi berdasarkan **Tipe Transaksi** (Semua, Transfer, Setor Tunai, Tarik Tunai) dan **Rentang Tanggal** (Hari Ini, 7 Hari Terakhir, Bulan Ini, atau kustom).
+   - *Cara pemenuhan:* Menambahkan dropdown filter dan date picker yang menyaring array sebelum dikirim ke fungsi `renderHistoryRows()`.
+3. **Fitur Ekspor CSV:** Pengguna dapat mengunduh seluruh baris mutasi yang tampil (sesuai filter aktif) ke dalam berkas format `.csv` berstandar internasional yang dapat dibuka langsung di Microsoft Excel atau Google Sheets.
+   - *Cara pemenuhan:* Membuat fungsi generator CSV sisi klien yang merangkai header dan baris dengan pemisah koma, membungkus teks dengan tanda petik, menambahkan BOM UTF-8 (`\uFEFF`) agar karakter khusus dan format Rupiah terbaca sempurna di Excel, lalu memicu download via elemen `<a>` sementara.
+
+---
+
+## 1. Dampak
+
+| Bagian yang terdampak | File / fungsi | Perubahan yang diperlukan |
+|---|---|---|
+| **Spesifikasi** | `01-spesifikasi.md` | Menambahkan fitur pencarian mutasi, filter tanggal/tipe, dan ekspor CSV ke dalam daftar Fitur Wajib (Bagian 4) serta Kriteria Selesai (Bagian 8). |
+| **Kode Antarmuka (Frontend)** | `basamo-index.html` -> fungsi `renderHistory()`, `renderHistoryRows()`, dan `exportToCSV()` | Menambahkan elemen input search bar, dropdown filter tipe transaksi, date input filter, tombol "Ekspor CSV", serta fungsi logika pembentukan berkas CSV. |
+| **Kode Layanan Data** | `basamo-index.html` -> fungsi helper filtering | Menjaga agar pemfilteran berjalan cepat di sisi klien (*in-memory array filter*) tanpa membebani pemanggilan I/O backend. |
+| **Kasus Uji / Test** | `04-kasus-uji.md` & test suite | Menambahkan kasus uji CR-01 (Pencarian nama/keterangan), CR-02 (Filter jenis transaksi & tanggal), dan CR-03 (Validasi keutuhan dan format file CSV yang diunduh). |
+| **README** | `README.md` & `README-template.md` | Menambahkan dokumentasi cara menggunakan filter mutasi dan tombol ekspor CSV pada bagian fitur dan tangkapan layar. |
+
+---
+
+## 2. Kasus Uji Baru
+
+| ID | Langkah / input | Hasil yang diharapkan |
+|---|---|---|
+| CR-01 | Pada halaman Riwayat Transaksi, ketik kata kunci `"cireng"` pada kolom pencarian | Tabel riwayat secara instan hanya menampilkan transaksi yang mengandung kata `"cireng"` pada kolom keterangan/deskripsi; baris transaksi lain disembunyikan. |
+| CR-02 | Pilih dropdown Filter Jenis Transaksi = `"Setor Tunai"` dan rentang waktu = `"Bulan Ini"` | Tabel hanya memuat baris transaksi bertipe `setor` yang terjadi pada bulan berjalan; mutasi transfer dan tarik tunai tidak ditampilkan. |
+| CR-03 | Lakukan filter transaksi, lalu klik tombol `"Ekspor CSV"` | Browser secara otomatis mengunduh berkas dengan nama `mutasi-transaksi-[tanggal].csv`. Saat dibuka di Excel, kolom tanggal, jenis, pengirim, penerima, nominal, dan keterangan tersusun rapi dengan pemisah kolom yang tepat. |
+| CR-04 | Masukkan kata kunci pencarian yang tidak ada di database, misal `"xyz123random"` | Tabel menampilkan pesan status informatif: *"Tidak ada transaksi yang cocok dengan pencarian atau filter Anda"*, tanpa error JavaScript. |
+
+---
+
+## 3. Setelah Selesai
+- [x] Kasus uji lama tetap lulus (U01–U10 tetap berfungsi normal tanpa regresi)
+- [x] Kasus uji baru lulus (CR-01 hingga CR-04 terverifikasi)
+- [x] Spesifikasi diperbarui (`01-spesifikasi.md` telah disinkronkan)
+- [x] README diperbarui (`README.md` dan `README-template.md` telah memuat panduan fitur baru)
