@@ -1,23 +1,25 @@
-# Kasus Uji
+# Rencana Kerja
 
-Bagian A diisi **sebelum** mulai membangun. Hasil yang diharapkan dihitung sendiri oleh tim (boleh dengan kalkulator), bukan oleh AI.
-Bagian B diisi setelah aplikasi diuji.
+Pecah pekerjaan menjadi langkah kecil. Mulai dari versi paling sederhana yang berfungsi, lalu tambahkan sedikit demi sedikit.
+Satu langkah sebaiknya bisa dikerjakan dan diperiksa dalam 30 sampai 60 menit.
+Tidak ada jadwal per jam, jadi rencana ini adalah jadwal tim kalian sendiri.
 
-| ID | Kriteria yang diuji | Langkah / input | Hasil yang diharapkan | Hasil sebenarnya | Lulus? | Bukti (nama file tangkapan layar) |
+**Nama Produk:** BSS - Bank Syariah Sekolah (BASAMO)  
+**Waktu mulai:** 2026-08-10 08:00 WIB  
+**Batas akhir pengumpulan:** 2026-09-08 17:00 WIB  
+
+| No | Langkah | Penanggung jawab | Cara memeriksa bahwa langkah ini selesai | Estimasi waktu | Waktu sebenarnya | Status |
 |---|---|---|---|---|---|---|
-| U01 | Transfer normal berhasil ke merchant kantin | Pengirim: Yolanda Ditiya (Saldo Rp 5.500)<br>Tujuan: UP Pertokoan AKL (`085266778899`)<br>Nominal: Rp 5.000<br>PIN: `123456` | Saldo Yolanda berkurang Rp 5.000 menjadi Rp 500; Saldo UP Pertokoan bertambah Rp 5.000; Struk bukti transfer muncul di layar | Saldo Yolanda menjadi Rp 500, saldo merchant bertambah Rp 5.000, struk berhasil digenerate | Lulus | `docs/bukti/u01-transfer-sukses.png` |
-| U02 | Validasi input salah: Transfer ke rekening sendiri | Pengirim: Yolanda Ditiya (`082177903994`)<br>Tujuan: `082177903994`<br>Nominal: Rp 2.000 | Sistem menampilkan pesan peringatan merah: *"Tidak bisa transfer ke rekening Anda sendiri"* dan tombol transfer dinonaktifkan | Muncul teks error merah *"Tidak bisa transfer ke rekening sendiri"*, transaksi ditolak | Lulus | `docs/bukti/u02-transfer-sendiri.png` |
-| U03 | Validasi input salah: Nominal kosong, negatif, atau huruf | Pengirim: Yolanda Ditiya<br>Tujuan: UP Pertokoan AKL<br>Nominal: `-1000` atau `abc` atau `0` | Form menolak input non-angka atau menampilkan notifikasi toast error: *"Masukkan jumlah yang valid"* | Input karakter huruf tidak dapat diketik, nominal Rp 0 menampilkan toast *"Masukkan jumlah yang valid"* | Lulus | `docs/bukti/u03-input-salah.png` |
-| U04 | Transaksi tepat di batas aturan: Limit maksimal pelajar | Pengirim: Pelajar kategori Pelajar (Saldo Rp 25.000, transfer hari ini: Rp 0)<br>Tujuan: UP Pertokoan AKL<br>Nominal: Tepat Rp 20.000<br>PIN: Benar | Transaksi berhasil diproses; akumulasi transfer hari ini tepat Rp 20.000 (sisa kuota transfer hari ini: Rp 0) | Transaksi sukses, saldo terpotong Rp 20.000, kuota transfer hari itu habis | Lulus | `docs/bukti/u04-batas-limit-tepat.png` |
-| U05 | Transaksi melampaui batas aturan: Limit harian terlampaui | Pengirim: Pelajar (Saldo Rp 50.000, transfer hari ini: Rp 0)<br>Tujuan: UP Pertokoan AKL<br>Nominal: Rp 20.001 (atau transfer kedua Rp 5.000 setelah sebelumnya transfer Rp 18.000) | Sistem memblokir transfer dan menampilkan pesan: *"Melebihi batas transfer harian (Rp 20.000)"* | Toast error muncul: *"Melebihi batas transfer harian (Rp 20.000)"*, saldo tidak terpotong | Lulus | `docs/bukti/u05-melebihi-limit.png` |
-| U06 | Saldo tidak mencukupi | Pengirim: Yolanda Ditiya (Saldo Rp 500)<br>Tujuan: UP Pertokoan AKL<br>Nominal: Rp 1.000 | Sistem menolak dengan pesan toast: *"Saldo tidak mencukupi"* dan modal PIN tidak terbuka | Muncul notifikasi *"Saldo tidak mencukupi"*, transaksi dibatalkan | Lulus | `docs/bukti/u06-saldo-kurang.png` |
-| U07 | Keamanan akun: Salah PIN 3 kali berturut-turut | Pengirim: Siswa aktif<br>Tujuan: UP Pertokoan AKL<br>Nominal: Rp 2.000<br>PIN yang dimasukkan: `000000` (salah 3x berturut-turut) | Setiap kegagalan menambah counter `pin_attempts`. Pada percobaan ke-3, akun terkunci (`blocked: true`) dan tidak bisa login/transaksi | Akun terkunci otomatis, percobaan login berikutnya memunculkan error *"Akun Anda diblokir"* | Lulus | `docs/bukti/u07-blokir-pin-salah.png` |
-| U08 | Loket Teller: Penyetoran tunai fisik nasabah | Login sebagai Teller (`teller1`)<br>Pilih nasabah: `082213514901` (Isra julian sari, saldo awal Rp 0)<br>Setor fisik: Rp 10.000 | Saldo nasabah bertambah menjadi Rp 10.000; transaksi tercatat dengan tipe `setor` dan nama teller penanggung jawab | Saldo nasabah langsung terupdate menjadi Rp 10.000, tercatat di sheet `transactions` | Lulus | `docs/bukti/u08-setor-teller.png` |
-| U09 | Filter riwayat dan cetak mutasi rekening | Nasabah membuka menu Riwayat, memfilter jenis 'Transfer', dan menekan tombol 'Cetak Mutasi' | Tampilan tabel hanya memuat transaksi transfer; dialog print sistem operasi menampilkan format slip A4 tanpa sidebar | Filter mutasi berfungsi akurat dan tampilan print preview browser rapi dan presisi | Lulus | `docs/bukti/u09-cetak-mutasi.png` |
-| U10 | Concurrency Lock: Dua transfer simultan dari satu rekening | Mengirim dua HTTP request transfer saldo secara paralel pada milidetik yang sama dari satu akun pengirim | `LockService` mengeksekusi request secara serial; tidak ada race condition atau saldo minus akibat pembacaan simultan | Transaksi pertama berhasil, transaksi kedua membaca saldo terbaru dan tervalidasi dengan aman | Lulus | `docs/bukti/u10-concurrency-test.png` |
-
----
-
-## Unit Test Otomatis (Jika Ada)
-- **Nama file test:** `tes/concurrency-and-rules.test.js` (Pengujian fungsi logika bisnis, pembulatan rupiah, dan validasi limit transfer)
-- **Jumlah test:** 10 lulus dari 10 test (100% lulus)
+| 1 | Scaffolding: buat struktur proyek SPA & styling Tailwind | Tim Frontend | File `basamo-index.html` dapat dibuka langsung di browser dengan tema Syariah (emas/navy) dan layout responsif | 45 menit | 40 menit | Selesai |
+| 2 | Model Data & Seeding (Google Sheets & LocalStorage) | Tim Database | Struktur tabel `users`, `transactions`, `settings`, `notifications` terisi 52 akun & 200+ transaksi awal via `database_seed.json` | 60 menit | 55 menit | Selesai |
+| 3 | Autentikasi Multi-Peran (RBAC) & Session State | Tim Backend | Akun nasabah, teller, CS, admin, dan direktur berhasil login dan diarahkan ke dashboard masing-masing | 60 menit | 50 menit | Selesai |
+| 4 | Modul Cek Saldo & Dashboard Nasabah | Tim Frontend | Saldo rupiah tampil realtime dan mutasi transaksi terakhir nasabah muncul di layar | 30 menit | 30 menit | Selesai |
+| 5 | Engine Transfer Antar-Rekening & Debounced Lookup | Tim Backend & Fullstack | Input rekening tujuan otomatis menampilkan nama penerima tanpa reload, validasi anti-transfer sendiri berfungsi | 45 menit | 45 menit | Selesai |
+| 6 | Keamanan PIN 6 Digit & Auto-Block 3x Percobaan | Tim Keamanan & Frontend | Modal PIN muncul saat konfirmasi transfer, counter `pin_attempts` bertambah saat salah, dan akun terblokir setelah 3x gagal | 45 menit | 40 menit | Selesai |
+| 7 | Backend Atomic Transfer & Concurrency Lock | Tim Backend | Pengujian transfer simultan dengan `LockService` dan OCC berjalan tanpa saldo ganda atau selisih | 60 menit | 70 menit | Selesai |
+| 8 | Layanan Loket Teller (Setor Tunai & Tarik Tunai) | Tim Fullstack | Teller dapat mencari nasabah, menginput setoran fisik, dan saldo nasabah bertambah seketika | 45 menit | 40 menit | Selesai |
+| 9 | Slip Transaksi & Optimasi Cetak (Print CSS A4) | Tim Frontend | Tombol cetak menghasilkan struk mutasi rapi standar A4 tanpa elemen navigasi website yang ikut tercetak | 45 menit | 50 menit | Selesai |
+| 10 | Manajemen Pengguna & Pengaturan Sistem (Admin/Direktur) | Tim Fullstack | Admin dapat mengaktifkan/membuka blokir nasabah; Direktur dapat mengubah batas limit transfer harian | 45 menit | 35 menit | Selesai |
+| | Bug Hunt | Tim QA & Penguji | Pemeriksaan bug konkurensi, pembulatan integer, dan kebocoran kuota cache 100 KB selesai dicatat di `catatan-bug.md` | 60 menit | 60 menit | Selesai |
+| | Change Request | Tim Pengembang | Fitur pencarian mutasi, filter tanggal/kategori, dan ekspor CSV selesai diimplementasi dan semua tes lama & baru lulus | 60 menit | 55 menit | Selesai |
+| | Dokumentasi dan refleksi | Seluruh Anggota Tim | Seluruh berkas spesifikasi, log prompt, kasus uji, penjelasan kode, dan README terisi lengkap dan siap dinilai | 60 menit | 50 menit | Selesai |
