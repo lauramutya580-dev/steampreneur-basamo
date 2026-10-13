@@ -1,0 +1,17 @@
+# Catatan Code Review
+
+Minta AI me-review kode kalian, lalu putuskan saran mana yang diterima.
+Menolak saran AI dengan alasan yang jelas adalah hal yang baik.
+
+**Prompt review yang dipakai:**
+> *"Tinjau kode sumber backend Google Apps Script (`basamo-Code.gs`) dan antarmuka web SPA (`basamo-index.html`). Berikan evaluasi mengenai aspek keamanan transaksi, efisiensi kuota I/O spreadsheet, keandalan penanganan kesalahan (error handling), dan performa rendering antarmuka pengguna."*
+
+| No | Saran dari AI | Diterima / ditolak | Alasan | Bagian kode yang berubah |
+|---|---|---|---|---|
+| 1 | Menerapkan teknik *Debounce* pada input nomor rekening tujuan transfer | **Diterima** | Mencegah pemanggilan fungsi pencarian dan iterasi array berkali-kali pada setiap huruf/angka yang diketik oleh pengguna, sehingga antarmuka tetap ringan dan responsif. | Penambahan helper `debounce(lookupTransferTargetFunc, 300)` pada input `#tf-to` di `basamo-index.html`. |
+| 2 | Menggunakan *polling interval* (misalnya setiap 2 detik) untuk menyinkronkan saldo terbaru nasabah secara otomatis | **Ditolak** | Polling setiap 2 detik ke Google Apps Script akan dengan cepat menghabiskan kuota eksekusi harian (Google Apps Script Quotas / 6 menit per trigger) dan memicu pemblokiran request server (*rate limiting*). | Sinkronisasi saldo tetap menggunakan pendekatan event-driven (diperbarui segera setelah transaksi selesai diproses atau saat halaman dimuat ulang). |
+| 3 | Mengganti penyimpanan JSON per-baris di Google Sheets menjadi format kolom spreadsheet biasa (Kolom A=Nama, B=Saldo, C=PIN, dst.) | **Ditolak** | Format JSON per baris dengan metadata `__version` dan `__backendId` memungkinkan skema data yang sangat fleksibel (NoSQL-like) dan pembacaan batch sebaris 1 operasi I/O, jauh lebih cepat daripada membaca puluhan kolom terpisah via Google Sheets API. | Struktur kolom tabel tetap dipertahankan: `__backendId`, `Data_JSON`, `__version`, dan `__timestamp` pada fungsi `setupDatabase()`. |
+| 4 | Menambahkan proteksi *Print CSS* khusus (@media print) agar struk transaksi tercetak presisi di kertas A4 tanpa elemen UI browser | **Diterima** | Sangat penting untuk keabsahan operasional loket sekolah agar siswa dan kasir toko mendapatkan bukti cetak fisik yang bersih tanpa tombol, header navigasi, atau background gelap. | Penambahan blok `@media print` lengkap dengan `table`, `thead`, `page-break-inside: avoid` pada tag `<style>` di `basamo-index.html`. |
+| 5 | Mengenkripsi PIN dan kata sandi menggunakan hash satu arah SHA-256 sebelum disimpan ke database | **Diterima** | Melindungi privasi nasabah siswa dan staf agar kredensial PIN dan password tidak terbaca dalam bentuk teks polos (*plaintext*) oleh staf pengelola spreadsheet. | Penambahan modul hashing kredensial pada alur pendaftaran dan verifikasi login/PIN. |
+
+Penjelasan kode ditulis terpisah di `08-penjelasan-kode.md`.
