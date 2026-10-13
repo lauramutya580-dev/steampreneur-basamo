@@ -1,0 +1,183 @@
+# BSS - Bank Syariah Sekolah (BASAMO)
+
+Aplikasi perbankan mikro sekolah berbasis web syariah untuk mengelola tabungan siswa, melayani setor tunai loket teller, serta memfasilitasi transaksi belanja non-tunai (*cashless*) yang aman dan bebas riba di lingkungan sekolah SMKN 2 Kerinci.
+
+---
+
+## Alur Inti
+
+Alur utama yang dilakukan pengguna dari awal sampai akhir:
+
+1. **Login Sesuai Peran:** Pengguna (Siswa/Guru/Kantin/Teller/Admin/Direktur) masuk menggunakan nomor HP/username dan password yang terdaftar.
+2. **Cek Saldo & Informasi Rekening:** Nasabah melihat saldo riil dalam format Rupiah, nomor rekening, dan daftar transaksi mutasi terakhir.
+3. **Penyetoran Kas (Loket Teller):** Siswa menyerahkan uang tunai di loket mini bank sekolah; Teller menginput setoran tunai sehingga saldo digital siswa bertambah secara instan.
+4. **Transaksi Belanja / Transfer Non-Tunai:** Siswa memasukkan nomor rekening toko (UP Pertokoan AKL / Kantin), memvalidasi nama penerima, memasukkan nominal belanja, dan mengonfirmasi dengan PIN 6 digit rahasia.
+5. **Pencatatan Atomik & Bukti Struk:** Sistem memotong saldo pengirim dan menambah saldo penerima secara atomik dengan *Optimistic Concurrency Control (OCC)*, lalu menerbitkan struk/slip transaksi yang dapat dicetak.
+6. **Audit & Monitoring (Direktur):** Direktur memantau total likuiditas kas, rekapitulasi transaksi seluruh nasabah, dan mengaudit buku kas sekolah secara berkala.
+
+---
+
+## Cara Menjalankan (How to Run)
+
+Aplikasi BSS didesain dengan arsitektur **Zero-Dependency Single Page Application (SPA)** yang dapat dijalankan secara instan di komputer juri tanpa memerlukan instalasi database rumit, serta siap dideploy ke Google Apps Script.
+
+### Prasyarat
+
+- Browser modern: Google Chrome versi 110+, Mozilla Firefox versi 110+, atau Microsoft Edge.
+- (Opsional untuk deploy backend): Akun Google Spreadsheet & Editor Google Apps Script.
+
+---
+
+### Langkah Menjalankan Secara Cepat (Mode Preview Lokal)
+
+1. **Buka Folder Proyek:**
+   Ekstrak atau buka folder `APK_basamo` di komputer Anda.
+2. **Buka Aplikasi di Browser:**
+   Klik dua kali berkas `basamo-index.html`, atau buka browser dan arahkan ke alamat file lokal:
+   ```
+   file:///c:/Users/Mutya/Downloads/Apk_basamo/basamo-index.html
+   ```
+3. **Basis Data Otomatis Terinisialisasi:**
+   Aplikasi secara otomatis mendeteksi ketiadaan server backend dan langsung memuat **Database Benih (Seed Database) asli STEAM - BASAMO** yang memuat 52 akun nasabah/staf dan 203 catatan transaksi nyata ke dalam `localStorage`.
+
+---
+
+### Langkah Deploy ke Google Apps Script (Mode Produksi Server)
+
+1. Buka [Google Sheets](https://sheets.new) dan buat spreadsheet baru.
+2. Buka menu **Ekstensi > Apps Script**.
+3. Salin seluruh isi berkas `basamo-Code.gs` ke editor Apps Script.
+4. Buat file HTML baru bernama `Index.html` dan tempelkan seluruh isi `basamo-index.html`.
+5. Jalankan fungsi `setupScriptProperties("ID_SPREADSHEET_ANDA", "password_direktur")` satu kali.
+6. Klik **Terapkan (Deploy) > Kelola Penerapan > Aplikasi Web**, atur akses ke *"Siapa saja (Anyone)"*, lalu buka URL deployment yang dihasilkan.
+
+---
+
+### Akun atau Data Contoh (Mock Credentials)
+
+| Peran | Username / No. Rekening | Password | PIN (6 Digit) | Keterangan Akun |
+|---|---|---|---|---|
+| **Direktur** | `direktur` | `direktur150398` | - | Pimpinan BSS / Kepala Sekolah |
+| **Admin** | `admin01` | `Usdeka` | - | Admin Pengelola User & Rekening |
+| **Admin 2** | `dewi` | `123456` | - | Staf Akuntansi & Administrasi |
+| **Teller** | `teller1` | `123456` | `123456` | Petugas Loket Setor & Tarik Tunai |
+| **Customer Service** | `cs` | `123456` | - | Petugas Pendaftaran Nasabah Baru |
+| **Merchant Kantin** | `085266778899` | `Uppertokoan@kl` | `202626` | Unit Produksi Pertokoan AKL |
+| **Nasabah Pelajar 1** | `082177903994` | `123456` | `123456` | Yolanda Ditiya (Kelas X AKL) |
+| **Nasabah Pelajar 2** | `081328515514` | `123456` | `123456` | Elsi ulandari (Kelas X AKL) |
+| **Nasabah Pelajar 3** | `082311327899` | `123456` | `123456` | Pelita Putri Lisan (Kelas X AKL) |
+| **Nasabah Umum** | `085273496347` | `123456` | `123456` | Dewi Vusvita (Nasabah Kategori Umum) |
+
+---
+
+### Jika Terjadi Masalah
+
+1. **Data lokal terhapus atau ingin kembali ke kondisi awal:**
+   Tekan tombol *"Reset Database"* di pojok antarmuka atau jalankan perintah berikut di console browser (F12):
+   ```javascript
+   resetToSeedDatabase();
+   ```
+   Aplikasi akan memuat ulang 52 akun dan 203 transaksi asli.
+2. **Akun terblokir karena salah PIN 3x:**
+   Login sebagai Admin (`admin01`), buka menu Manajemen Nasabah, cari nama akun, lalu klik tombol *"Buka Blokir"*.
+
+---
+
+## Tangkapan Layar Alur Inti
+
+Minimal satu tangkapan layar untuk setiap langkah alur inti, termasuk hasil change request. Seluruh gambar tersimpan di folder `docs/bukti/`.
+
+1. **Langkah 1: Halaman Login Multi-Peran**  
+   ![Halaman Login](docs/bukti/langkah-1-login.png)
+2. **Langkah 2: Dashboard Nasabah & Cek Saldo Real-time**  
+   ![Dashboard Nasabah](docs/bukti/langkah-2-dashboard.png)
+3. **Langkah 3: Form Transfer dengan Debounced Lookup Rekening**  
+   ![Form Transfer](docs/bukti/langkah-3-transfer.png)
+4. **Langkah 4: Modal Otentikasi PIN 6 Digit**  
+   ![Modal PIN](docs/bukti/langkah-4-pin.png)
+5. **Langkah 5: Cetak Slip Struk Transaksi Standar A4**  
+   ![Cetak Slip](docs/bukti/langkah-5-slip.png)
+6. **Langkah 6: Loket Setor Tunai Teller**  
+   ![Loket Teller](docs/bukti/langkah-6-teller.png)
+7. **Langkah 7: Change Request (Pencarian, Filter, dan Ekspor CSV)**  
+   ![Change Request](docs/bukti/langkah-7-change-request.png)
+
+---
+
+## Cara Menjalankan Pengujian
+
+Untuk menjalankan unit test logika bisnis perbankan, validasi batas limit, sanitasi integer rupiah, dan pencegahan konkurensi:
+
+```bash
+# Jalankan pengujian otomatis dengan Node.js test runner
+npm test
+```
+
+Hasil yang diharapkan:
+```
+✔ U01: Transfer saldo valid dengan PIN benar (Passed)
+✔ U02: Penolakan transfer ke rekening sendiri (Passed)
+✔ U03: Sanitasi nominal negatif & desimal rupiah (Passed)
+✔ U04: Transaksi tepat di batas limit harian pelajar (Passed)
+✔ U05: Penolakan transaksi melebihi limit harian (Passed)
+✔ U06: Penolakan transfer saat saldo tidak mencukupi (Passed)
+✔ U07: Pemblokiran otomatis setelah 3x salah PIN (Passed)
+✔ U08: Eksekusi setor tunai loket teller (Passed)
+✔ U09: Filter riwayat mutasi dan pencarian (Passed)
+✔ U10: Pencegahan race condition saldo ganda (Passed)
+
+Total: 10 tests passed (100% success rate)
+```
+
+---
+
+## Fitur Utama
+
+- **Otentikasi Multi-Peran (RBAC):** Hak akses terpisah untuk Direktur, Admin, Teller, CS, Nasabah Pelajar, dan Nasabah Umum.
+- **Transaksi Transfer Atomik:** Pengurangan saldo pengirim dan penambahan saldo penerima terproteksi oleh `LockService` dan OCC.
+- **Keamanan PIN 6 Digit:** Konfirmasi transfer dengan PIN numerik dan auto-block setelah 3 kali gagal berturut-turut.
+- **Debounced Account Lookup:** Deteksi otomatis nama pemilik rekening tujuan saat nomor handphone diketik.
+- **Limit Transaksi Harian Fleksibel:** Pembatasan belanja harian pelajar (Rp 20.000) untuk mencegah perilaku konsumtif.
+- **Loket Teller:** Setor tunai dan tarik tunai fisik dengan pencatatan nama petugas loket.
+- **Cetak Bukti & Struk Presisi:** Styling `@media print` teroptimasi untuk kertas A4 portrait tanpa elemen navigasi website.
+- **Pencarian, Filter, & Ekspor CSV:** Penyaringan mutasi berdasarkan kata kunci dan tanggal, serta unduh rekapitulasi buku kas ke format CSV.
+
+---
+
+## Batasan yang Diketahui
+
+- Belum mendukung transfer antar bank nasional di luar ekosistem sekolah (fokus perbankan mikro tertutup).
+- Belum terintegrasi dengan pemindai kartu RFID/NFC fisik (otentikasi saat ini menggunakan nomor HP/rekening dan PIN digital).
+- Mode preview lokal menggunakan penyimpanan browser `localStorage`, sehingga transaksi pada mode preview hanya tersimpan di perangkat lokal masing-masing browser.
+
+---
+
+## Struktur Folder
+
+| File / folder | Isi |
+|---|---|
+| `docs/` | Dokumen spesifikasi, rencana kerja, log prompt, kasus uji, dan refleksi |
+| `docs/bukti/` | Tangkapan layar bukti pengujian alur inti dan change request |
+| `src/` atau `APK_basamo/` | Kode sumber aplikasi (`basamo-index.html` dan `basamo-Code.gs`) |
+| `tes/` | Berkas pengujian unit test logika bisnis |
+| `bughunt-kasir/` | Laporan temuan Bug Hunt dan pengujian konkurensi kasir kantin |
+
+---
+
+## Sumber dan Lisensi
+
+| Nama | Sumber (link) | Lisensi |
+|---|---|---|
+| Tailwind CSS CDN | [https://tailwindcss.com](https://tailwindcss.com) | MIT License |
+| Plus Jakarta Sans Font | [Google Fonts](https://fonts.google.com/specimen/Plus+Jakarta+Sans) | SIL Open Font License |
+| Heroicons SVG Icons | [https://heroicons.com](https://heroicons.com) | MIT License |
+
+---
+
+## Tim Pengembang
+
+| Nama | Peran |
+|---|---|
+| Mutya Laura | Lead Software Engineer & Backend Concurrency Specialist |
+| Cantika Amelian| Frontend UI/UX Developer & Single Page Application Specialist |
+| Isra Julian Sari| Financial Logic Analyst & Quality Assurance Tester |
