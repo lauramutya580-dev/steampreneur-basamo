@@ -1,0 +1,20 @@
+# Refleksi Tim
+
+### 1. Apa yang berjalan baik dalam cara kami bekerja dengan AI?
+Cara kerja kami dengan AI berjalan sangat efektif ketika kami memberikan spesifikasi aturan bisnis yang sangat rinci dan konkret (misalnya: struktur skema data JSON yang diharapkan, batasan limit transfer pelajar vs umum, dan skenario kegagalan PIN). AI sangat cepat dalam menghasilkan kerangka kode antarmuka HTML/Tailwind CSS yang rapi serta fungsi-fungsi manipulasi data. Kami memperlakukan AI sebagai asisten pemrograman pasangan (*pair programmer*), di mana setiap kode yang dihasilkan selalu diuji dan ditinjau secara manual terlebih dahulu sebelum dimasukkan ke dalam basis kode utama.
+
+### 2. Kapan AI paling membantu? Kapan AI justru menyulitkan?
+- **Paling Membantu:** Saat merancang antarmuka SPA yang interaktif, pembuatan aturan styling cetak `@media print` untuk ukuran A4, pembuatan fungsi format mata uang Rupiah (`formatRupiah`), dan penyiapan data awal (*mock seed database*) berisi puluhan nasabah sekolah yang realistis.
+- **Paling Menyulitkan:** Saat menangani masalah konkurensi data dan keterbatasan arsitektur lingkungan Google Apps Script. AI sering mengasumsikan lingkungan eksekusi adalah Node.js tradisional dengan database SQL/MongoDB, sehingga menyarankan solusi yang tidak kompatibel dengan batasan kuota eksekusi Google Apps Script (misalnya batasan 100 KB pada `CacheService` atau menyarankan polling real-time interval tinggi).
+
+### 3. Kesalahan terbesar yang hampir lolos, dan bagaimana kami menemukannya?
+Kesalahan terbesar adalah **kondisi balapan (race condition) pada transfer saldo**. Jika dua transaksi dikirim pada detik yang sama untuk akun pengirim yang sama, kode awal dari AI membaca saldo awal yang sama untuk kedua transaksi, sehingga saldo pengirim hanya terpotong satu kali sementara saldo kedua penerima sama-sama bertambah. Kami menemukannya saat melakukan uji stres (*stress testing*) dengan simulasi klik ganda cepat (*rapid double-click*) pada tombol transfer saat koneksi jaringan disimulasikan lambat. Dari temuan ini, kami segera menambahkan `LockService` dan mekanisme rollback saldo pengirim.
+
+### 4. Apa yang akan kami lakukan berbeda jika mengulang challenge ini?
+Jika mengulang challenge ini, kami akan mendesain mekanisme manajemen state data dan penanganan konkurensi di awal sebelum menulis tampilan antarmuka. Sebelumnya, kami terlalu fokus mempercantik tampilan dashboard di awal, sehingga saat menemukan masalah konkurensi transfer saldo, kami harus merombak alur komunikasi data antara frontend dan backend. Kami juga akan menyiapkan unit test otomatis logika perbankan sejak hari pertama.
+
+### 5. Bagaimana kami mengatur waktu? Langkah mana yang jauh lebih lama dari estimasi, dan kenapa?
+Kami membagi pekerjaan ke dalam sprint-sprint kecil berdurasi 30–60 menit per fitur, dengan penanggung jawab yang jelas untuk frontend, backend, dan pengujian. Langkah yang memakan waktu jauh lebih lama dari estimasi adalah **Langkah 7: Backend Atomic Transfer & Concurrency Lock** (estimasi 60 menit, realisasi 70 menit) dan penyesuaian **CSS Print Multi-Page** (estimasi 45 menit, realisasi 50 menit). Hal ini terjadi karena debugging perilaku lock thread di Google Apps Script membutuhkan pengujian beberapa akun secara bersamaan dan penyesuaian margin cetak browser agar pas di satu lembar A4.
+
+### 6. Bagian mana dari kode yang masih belum kami pahami sepenuhnya? (Jawab dengan jujur.)
+Bagian yang paling kompleks dan membutuhkan pemahaman lebih dalam adalah mekanisme internal **LockService Google Apps Script di tingkat infrastruktur Google Cloud**. Kami memahami bahwa `LockService.getScriptLock().waitLock(timeout)` berfungsi menahan eksekusi skrip lain hingga kunci dilepaskan, namun kami belum sepenuhnya yakin bagaimana Google mendistribusikan kunci tersebut jika aplikasi diakses ribuan pengguna secara bersamaan dari berbagai region geografis berbeda, serta berapa batas absolut antrean konkurensi sebelum Google mengembalikan error batas kuota server (*quota limits exceeded*).
