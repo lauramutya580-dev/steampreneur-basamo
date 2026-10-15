@@ -1,21 +1,28 @@
-# Rencana Kerja
+#  02 - Rencana Kerja
 
-**Nama Produk:** BSS - Bank Syariah Sekolah (BASAMO)  
-**Waktu mulai:** 2026-08-10 08:00 WIB  
-**Batas akhir pengumpulan:** 2026-09-08 17:00 WIB  
+## 📋 Tabel Rencana Kerja
 
-| No | Langkah | Penanggung jawab | Cara memeriksa bahwa langkah ini selesai | Estimasi waktu | Waktu sebenarnya | Status |
-|---|---|---|---|---|---|---|
-| 1 | Scaffolding: buat struktur proyek SPA & styling Tailwind | Tim Frontend | File `basamo-index.html` dapat dibuka langsung di browser dengan tema Syariah (emas/navy) dan layout responsif | 45 menit | 40 menit | Selesai |
-| 2 | Model Data & Seeding (Google Sheets & LocalStorage) | Tim Database | Struktur tabel `users`, `transactions`, `settings`, `notifications` terisi 52 akun & 200+ transaksi awal via `database_seed.json` | 60 menit | 55 menit | Selesai |
-| 3 | Autentikasi Multi-Peran (RBAC) & Session State | Tim Backend | Akun nasabah, teller, CS, admin, dan direktur berhasil login dan diarahkan ke dashboard masing-masing | 60 menit | 50 menit | Selesai |
-| 4 | Modul Cek Saldo & Dashboard Nasabah | Tim Frontend | Saldo rupiah tampil realtime dan mutasi transaksi terakhir nasabah muncul di layar | 30 menit | 30 menit | Selesai |
-| 5 | Engine Transfer Antar-Rekening & Debounced Lookup | Tim Backend & Fullstack | Input rekening tujuan otomatis menampilkan nama penerima tanpa reload, validasi anti-transfer sendiri berfungsi | 45 menit | 45 menit | Selesai |
-| 6 | Keamanan PIN 6 Digit & Auto-Block 3x Percobaan | Tim Keamanan & Frontend | Modal PIN muncul saat konfirmasi transfer, counter `pin_attempts` bertambah saat salah, dan akun terblokir setelah 3x gagal | 45 menit | 40 menit | Selesai |
-| 7 | Backend Atomic Transfer & Concurrency Lock | Tim Backend | Pengujian transfer simultan dengan `LockService` dan OCC berjalan tanpa saldo ganda atau selisih | 60 menit | 70 menit | Selesai |
-| 8 | Layanan Loket Teller (Setor Tunai & Tarik Tunai) | Tim Fullstack | Teller dapat mencari nasabah, menginput setoran fisik, dan saldo nasabah bertambah seketika | 45 menit | 40 menit | Selesai |
-| 9 | Slip Transaksi & Optimasi Cetak (Print CSS A4) | Tim Frontend | Tombol cetak menghasilkan struk mutasi rapi standar A4 tanpa elemen navigasi website yang ikut tercetak | 45 menit | 50 menit | Selesai |
-| 10 | Manajemen Pengguna & Pengaturan Sistem (Admin/Direktur) | Tim Fullstack | Admin dapat mengaktifkan/membuka blokir nasabah; Direktur dapat mengubah batas limit transfer harian | 45 menit | 35 menit | Selesai |
-| | Bug Hunt | Tim QA & Penguji | Pemeriksaan bug konkurensi, pembulatan integer, dan kebocoran kuota cache 100 KB selesai dicatat di `catatan-bug.md` | 60 menit | 60 menit | Selesai |
-| | Change Request | Tim Pengembang | Fitur pencarian mutasi, filter tanggal/kategori, dan ekspor CSV selesai diimplementasi dan semua tes lama & baru lulus | 60 menit | 55 menit | Selesai |
-| | Dokumentasi dan refleksi | Seluruh Anggota Tim | Seluruh berkas spesifikasi, log prompt, kasus uji, penjelasan kode, dan README terisi lengkap dan siap dinilai | 60 menit | 50 menit | Selesai |
+| No | Langkah | Penanggung Jawab | Cara memeriksa bahwa langkah ini selesai | Estimasi Waktu | Waktu Sebenarnya | Status |
+|:--:|---------|------------------|------------------------------------------|:--------------:|:----------------:|:------:|
+| 1 | **Scaffolding:** Buat struktur proyek (Setup Google Apps Script, HTML dasar, Tailwind CSS CDN) | Mutya Laura | Proyek bisa dibuka di browser dan menampilkan halaman loading | 30 menit | 30 menit | ✅ Selesai |
+| 2 | **Setup Database:** Buat sheet `users`, `transactions`, `settings`, `notifications` & fungsi CRUD dasar | Mutya Laura | Sheet terbuat otomatis, data dummy bisa dibaca dan ditulis via console | 45 menit | 45 menit | ✅ Selesai |
+| 3 | **UI Login & Register:** Buat form login dan register nasabah dengan validasi input | Cantika Amelian | Form muncul rapi, validasi No. HP (08xxx) dan PIN (6 digit) berjalan | 60 menit | 60 menit | ✅ Selesai |
+| 4 | **Autentikasi & Role:** Hubungkan login ke database, bedakan akses role (Direktur, Teller, Nasabah) | Mutya Laura & Cantika | Login berhasil, redirect ke dashboard yang sesuai dengan role user | 60 menit | 75 menit | ✅ Selesai |
+| 5 | **Dashboard Nasabah:** Tampilkan saldo, no. rekening, dan menu navigasi dasar nasabah | Cantika Amelian | Saldo tampil real-time, tombol transfer & riwayat bisa diklik | 45 menit | 45 menit | ✅ Selesai |
+| 6 | **Transaksi Setor/Tarik (Teller):** Buat UI dan fungsi CRUD transaksi tunai dengan verifikasi PIN | Mutya Laura | Saldo nasabah bertambah/berkurang, riwayat tercatat di database | 60 menit | 60 menit | ✅ Selesai |
+| 7 | **Transfer Saldo (Nasabah):** Buat fungsi transfer antar rekening dengan validasi saldo & PIN | Mutya Laura | Saldo pengirim & penerima update, validasi batas harian berjalan | 60 menit | 75 menit | ✅ Selesai |
+| 8 | **Manajemen Nasabah (Admin/CS):** Buat tabel list nasabah, fitur edit, reset password, dan nonaktifkan akun | Cantika Amelian | Tabel nasabah muncul, tombol edit/reset berfungsi tanpa error | 60 menit | 60 menit | ✅ Selesai |
+| 9 | **Fitur Cetak & Laporan:** Buat CSS print A4 dan fungsi generate Rekening Koran & Laporan Transaksi | Cantika Amelian | Print preview A4 rapi, header tabel repeat di halaman berikutnya | 60 menit | 60 menit | ✅ Selesai |
+| 10 | **Optimasi & Locking:** Tambahkan `LockService`, `CacheService`, dan Anti-duplikasi transaksi | Mutya Laura | Concurrent test (2 user akses bersamaan) tidak menyebabkan error data | 60 menit | 90 menit | ✅ Selesai |
+| 11 | **Bug Hunt:** Uji coba alur inti, cari bug, catat di `catatan-bug.md` dan perbaiki | Isra Julian Sari | Catatan bug dan test selesai, tidak ada bug kritis yang tersisa | 60 menit | 60 menit | ✅ Selesai |
+| 12 | **Change Request:** Implementasi fitur tambahan (filter kelas, sort saldo, cetak data filtered) | Tim (Semua) | Semua kasus uji lama dan baru lulus, filter & sort berjalan akurat | 60 menit | 60 menit | ✅ Selesai |
+| 13 | **Dokumentasi dan Refleksi:** Tulis README, spesifikasi produk, dan refleksi tim | Isra Julian Sari | README bisa diikuti orang lain, semua file dokumentasi lengkap | 60 menit | 60 menit | ✅ Selesai |
+
+---
+
+##  Catatan Rencana Kerja
+
+1. **Fleksibilitas:** Rencana ini bersifat dinamis. Jika ada langkah yang membutuhkan waktu lebih dari 60 menit, langkah tersebut akan dipecah lagi menjadi sub-langkah yang lebih kecil.
+2. **Kolaborasi:** Untuk langkah yang melibatkan 2 orang (seperti No. 4), satu orang fokus di backend (API) dan satu orang fokus di frontend (UI), kemudian digabungkan.
+3. **Quality Assurance:** Isra Julian Sari akan mulai melakukan pengujian (Bug Hunt) sejak langkah ke-6 untuk memastikan fitur yang sudah jadi langsung diverifikasi, bukan menunggu semua fitur selesai.
+4. **Change Request:** Fitur tambahan (Change Request) baru dikerjakan setelah alur inti (No. 1-10) benar-benar stabil dan bebas bug kritis.
