@@ -15,7 +15,7 @@ Berikut adalah langkah yang dilakukan pengguna dari awal sampai akhir untuk alur
 
 ## 💻 Cara Menjalankan (How to Run)
 
-> **Catatan Penting:** Proyek ini dibangun menggunakan **Google Apps Script (GAS)**, bukan Node.js atau framework frontend tradisional. Oleh karena itu, tidak ada perintah `npm install` atau `npm run dev`. Ikuti langkah deployment GAS berikut:
+> **Catatan Penting:** Proyek ini dibangun menggunakan **Google Apps Script (GAS)**, bukan Node.js atau framework frontend tradisional. Oleh karena itu, tidak ada perintah `npm install` atau `npm run dev`. Ikuti langkah berikut:
 
 ### Prasyarat
 
