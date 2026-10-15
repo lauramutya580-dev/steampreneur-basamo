@@ -1,150 +1,115 @@
-# Penjelasan Kode
+# 📖 08 - Penjelasan Kode
 
-Tidak ada sesi presentasi, jadi dokumen ini adalah bukti utama bahwa tim memahami kode yang dihasilkan AI.
+**Nama Proyek:** BSS - Bank Syariah Sekolah (BASAMO)
+**Tanggal:** 15 Oktober 2026
 
-Aturan:
-- Setiap anggota menjelaskan **minimal dua bagian kode yang berbeda**. Bagian yang dijelaskan tidak boleh sama dengan anggota lain.
-- Tulis dengan bahasa sendiri. Boleh bertanya ke AI untuk memahami, tetapi jangan menyalin jawabannya.
-- Sebut nama file dan fungsi yang nyata, serta contoh nilai yang nyata.
-- Jika memungkinkan, setiap anggota meng-commit bagiannya sendiri dari akun GitHub masing-masing.
+> **Catatan:** Tidak ada sesi presentasi, jadi dokumen ini adalah bukti utama bahwa tim memahami kode yang dihasilkan AI. Setiap anggota menjelaskan bagian kode dengan bahasa sendiri setelah berdiskusi dan membedah kode bersama.
 
 ---
 
-## Bagian A: Penjelasan per Anggota
+##  Bagian A: Penjelasan per Anggota
 
-### Penjelasan 1 (Anggota 1: Backend Engineer)
-- **Ditulis oleh:** Alfajri Nurhuda (Backend Specialist)
-- **File dan fungsi:** [basamo-Code.gs](file:///c:/Users/Alfajri/Downloads/Apk_basamo/basamo-Code.gs) -> fungsi `handleAtomicTransfer(transferData)` (baris 450–597)
-- **Apa yang dilakukan:** 
-  Fungsi ini mengeksekusi proses transfer dana antar dua nasabah secara atomik (*all-or-nothing*). Fungsi ini mengunci antrean eksekusi skrip (`acquireLock_`), memvalidasi saldo dan status akun pengirim serta penerima, memotong saldo pengirim menggunakan *Optimistic Concurrency Control* (OCC), menambahkan saldo penerima, mencatat riwayat transaksi ke sheet `transactions`, dan secara otomatis mengembalikan (*rollback*) saldo pengirim jika penambahan saldo penerima gagal di tengah jalan.
-- **Kenapa dibuat seperti ini:** 
-  Dalam aplikasi perbankan, integritas saldo adalah prioritas tertinggi. Jika tidak dibuat atomik, kegagalan jaringan atau konflik versi saat memperbarui penerima akan menyebabkan uang pengirim hilang tanpa masuk ke akun tujuan. Kunci `LockService` mencegah *race condition* jika ada request transfer ganda dalam waktu bersamaan.
-- **Contoh:** 
-  Jika inputnya `transferData = { fromAccount: "082177903994", toAccount: "085266778899", amount: 5000, description: "Cireng" }` dengan saldo Yolanda Rp 5.500 dan saldo UP Pertokoan Rp 771.600:
-  Hasilnya saldo Yolanda menjadi Rp 500, saldo UP Pertokoan menjadi Rp 776.600, data transaksi baru bertipe `'transfer'` dibuat dengan ID unik UUID, dan fungsi mengembalikan `{ status: true, allData: [...] }`.
-- **Jika input salah atau kosong:** 
-  Jika nominal Rp 0 atau negatif, fungsi mengembalikan `{ status: false, error: 'Jumlah transfer tidak valid' }`. Jika nomor rekening pengirim sama dengan penerima, fungsi mengembalikan error `'Tidak dapat mentransfer ke rekening Anda sendiri'`. Jika saldo tidak cukup, dikembalikan pesan error detail lengkap dengan saldo saat ini.
+### 👤 Penjelasan 1 & 2: Mutya Laura (Ketua Tim / Backend)
 
----
+#### Penjelasan 1
+- **Ditulis oleh:** Mutya Laura
+- **File dan fungsi:** `kode.gs` - fungsi `handleAtomicTransfer`
+- **Apa yang dilakukan:** Fungsi ini memproses transfer saldo antar nasabah secara atomik. Artinya, jika proses update saldo penerima gagal di tengah jalan, saldo pengirim akan otomatis dikembalikan (rollback) ke nilai semula agar data tidak korup.
+- **Kenapa dibuat seperti ini:** Karena ini adalah sistem keuangan, kita tidak boleh membiarkan saldo pengirim berkurang jika uangnya tidak sampai ke penerima. Kami menggunakan *Optimistic Locking* dengan field `__version` untuk mencegah *race condition* saat dua orang mentransfer uang dari rekening yang sama secara bersamaan.
+- **Contoh:** Jika inputnya `fromAccount: 081234567890`, `toAccount: 081234567899`, `amount: 50000`, dan saldo pengirim Rp100.000. Hasilnya saldo pengirim jadi Rp50.000 dan penerima bertambah Rp50.000.
+- **Jika input salah atau kosong:** Jika `amount <= 0` atau saldo pengirim kurang dari `amount`, fungsi akan langsung `return { status: false, error: '...' }` di awal tanpa memproses apa pun. Jika terjadi *version conflict* saat update penerima, sistem akan melakukan rollback saldo pengirim dengan meng-increment `__version` menjadi `+2` (bukan +1) karena versi sudah bertambah 1 saat update awal.
 
-### Penjelasan 2 (Anggota 1: Backend Engineer)
-- **Ditulis oleh:** Alfajri Nurhuda (Backend Specialist)
-- **File dan fungsi:** [basamo-Code.gs](file:///c:/Users/Alfajri/Downloads/Apk_basamo/basamo-Code.gs) -> fungsi `updateSheetRowOptimistic_(sheetName, id, jsonData, expectedVersion)` (baris 233–250)
-- **Apa yang dilakukan:** 
-  Fungsi ini melakukan pembaruan baris data di spreadsheet dengan memeriksa nomor versi (`__version`). Fungsi membaca versi yang saat ini ada di spreadsheet (kolom 3). Baris hanya akan diperbarui jika `expectedVersion === currentVersion + 1`. Setelah diperbarui, kolom versi dinaikkan dan timestamp ISO diperbarui.
-- **Kenapa dibuat seperti ini:** 
-  Ini adalah pola *Optimistic Concurrency Control* (OCC). Google Sheets tidak memiliki database transaction lock seperti PostgreSQL atau MySQL. Dengan OCC, jika ada dua proses membaca data versi 1 secara bersamaan, proses pertama yang menulis akan menaikkan versi menjadi 2. Proses kedua yang mencoba menulis dengan ekspektasi versi 2 akan ditolak karena versi di sheet sudah berubah menjadi 2. Ini mencegah penimpaan data tanpa sadar (*blind overwrite*).
-- **Contoh:** 
-  Jika baris data Yolanda saat ini memiliki `__version = 14`, proses transfer mengirimkan data baru dengan `expectedVersion = 15`. Karena `15 === 14 + 1`, baris di-update dan versi baru menjadi 15.
-- **Jika input salah atau kosong:** 
-  Jika ID tidak ditemukan di sheet, fungsi mengembalikan `false`. Jika `expectedVersion !== currentVersion + 1` (terjadi konflik versi), fungsi mencatat log peringatan `'Version conflict'` dan mengembalikan `false` tanpa mengubah data sedikit pun.
+#### Penjelasan 2
+- **Ditulis oleh:** Mutya Laura
+- **File dan fungsi:** `kode.gs` - fungsi `acquireLock_` dan `releaseLock_`
+- **Apa yang dilakukan:** Fungsi ini mengelola antrian eksekusi skrip menggunakan `LockService.getScriptLock()`. `acquireLock_` akan mencoba "mengunci" database selama 15 detik. Jika gagal karena ada skrip lain yang sedang berjalan, ia akan menunggu dan mencoba ulang (retry) maksimal 3 kali dengan jeda waktu yang makin lama (*exponential backoff*).
+- **Kenapa dibuat seperti ini:** Google Apps Script membatasi eksekusi konkuren. Tanpa *lock*, jika 2 Teller menginput setor tunai di detik yang sama, salah satu data bisa tertimpa (lost update). *Exponential backoff* (`Math.pow(2, attempts) * 100`) mencegah server dibebani oleh *retry* yang terjadi secara bersamaan.
+- **Contoh:** Jika Teller A dan Teller B klik "Proses" bersamaan, Teller A dapat *lock*. Teller B akan masuk ke `catch (e)`, tidur selama 200ms, lalu coba lagi.
+- **Jika input salah atau kosong:** Jika parameter `lockName` kosong, fungsi tetap berjalan karena `lockName` hanya digunakan untuk log `console.error`. Jika *timeout* 15 detik tercapai 3x berturut-turut, fungsi akan melempar *error* `'Sistem sedang sibuk...'`.
 
 ---
 
-### Penjelasan 3 (Anggota 2: Frontend Engineer)
-- **Ditulis oleh:** Yudiva Pratama (Frontend Specialist)
-- **File dan fungsi:** [basamo-index.html](file:///c:/Users/Alfajri/Downloads/Apk_basamo/basamo-index.html) -> fungsi `showPinModal()` & `lookupTransferTarget` (baris 2200–2245)
-- **Apa yang dilakukan:** 
-  Fungsi `lookupTransferTarget` mendeteksi nomor rekening tujuan yang diketikkan di input transfer dan secara otomatis mencari nama pemilik rekening (menggunakan teknik *debounce* 300ms). Fungsi `showPinModal()` memvalidasi kelengkapan form transfer (rekening tujuan, nominal, kecukupan saldo, dan batas limit harian kategori nasabah), lalu menampilkan pop-up modal masked input untuk memasukkan PIN otentikasi 6 digit.
-- **Kenapa dibuat seperti ini:** 
-  Pencarian rekening otomatis memberi kepastian visual kepada siswa agar tidak salah kirim ke nomor rekening orang lain. Modal PIN memisahkan fase pengisian data dan fase konfirmasi eksekusi transaksi, mencegah transfer yang tidak disengaja (*accidental click*).
-- **Contoh:** 
-  Ketika siswa mengetik nomor tujuan `085266778899`, di bawah form langsung muncul teks hijau: `✓ UP Pertokoan AKL`. Ketika nominal `Rp 5.000` diisi dan tombol ditekan, modal pop-up PIN muncul meminta input 6 titik password.
-- **Jika input salah atau kosong:** 
-  Jika pengguna memasukkan nomor rekening miliknya sendiri, teks merah langsung muncul: `✕ Tidak bisa transfer ke rekening sendiri` dan modal PIN tidak akan ditampilkan. Jika nominal melebihi limit harian (misal Rp 25.000 untuk pelajar), sistem langsung memunculkan pesan toast error: `"Melebihi batas transfer harian (Rp 20.000)"`.
+### 👤 Penjelasan 3 & 4: Cantika Amelian (Anggota / Frontend & UI)
+
+#### Penjelasan 3
+- **Ditulis oleh:** Cantika Amelian
+- **File dan fungsi:** `index.html` - fungsi `renderNasabahManagement` dan `filterNasabah`
+- **Apa yang dilakukan:** Fungsi ini merender tabel daftar nasabah dan menyediakan fitur *filtering* serta *sorting* secara *real-time*. `filterNasabah` mengambil nilai dari dropdown (Kategori, Kelas, Status, Sort Saldo) dan input pencarian, lalu memfilter array `nasabahList` dan merender ulang `<tbody>` tanpa me-reload halaman.
+- **Kenapa dibuat seperti ini:** Untuk UX yang lebih baik. Admin tidak perlu menunggu loading server setiap kali mengetik 1 huruf di kolom pencarian. Kami menggunakan fungsi `debounce(..., 300)` agar fungsi filter baru dipanggil 300ms setelah user berhenti mengetik, menghemat pemrosesan DOM.
+- **Contoh:** Jika user memilih Kategori "Pelajar" dan Sort "Saldo Tertinggi", fungsi akan memfilter array hanya untuk `category === 'pelajar'`, lalu mengurutkannya dengan `(b.balance || 0) - (a.balance || 0)`.
+- **Jika input salah atau kosong:** Jika kolom pencarian kosong, fungsi tidak memfilter nama. Jika tidak ada data yang cocok dengan filter, tabel akan menampilkan baris `<td colspan="...">Tidak ada data nasabah</td>`.
+
+#### Penjelasan 4
+- **Ditulis oleh:** Cantika Amelian
+- **File dan fungsi:** `index.html` - blok CSS `@media print`
+- **Apa yang dilakukan:** Blok CSS ini mengatur tampilan khusus saat user menekan tombol Cetak (Print). Ia menyembunyikan semua elemen UI (sidebar, tombol, header) menggunakan `visibility: hidden`, dan hanya menampilkan area `#print-area`. Ia juga memaksa tabel untuk bisa melintasi banyak halaman A4.
+- **Kenapa dibuat seperti ini:** Awalnya AI memberikan CSS dengan `overflow: hidden` yang memotong data di halaman pertama. Kami memperbaikinya secara manual. Kami menggunakan `display: table-header-group !important` pada `thead` agar judul kolom (Nama, Saldo, dll) otomatis muncul di atas setiap halaman baru saat dicetak. Kami juga mengecilkan font ke `10px` dan padding ke `4px` agar tabel muat lebih banyak.
+- **Contoh:** Jika user mencetak 100 data nasabah, browser akan menghasilkan 4 halaman A4. Halaman 2, 3, dan 4 tetap memiliki header tabel yang rapi.
+- **Jika input salah atau kosong:** Jika data kosong, tabel tetap tercetak namun hanya menampilkan baris "Tidak ada data" di tengah halaman.
 
 ---
 
-### Penjelasan 4 (Anggota 2: Frontend Engineer)
-- **Ditulis oleh:** Yudiva Pratama (Frontend Specialist)
-- **File dan fungsi:** [basamo-index.html](file:///c:/Users/Alfajri/Downloads/Apk_basamo/basamo-index.html) -> fungsi `getPreviewStorageData()` & `window.dataSdk.init()` (baris 153–256)
-- **Apa yang dilakukan:** 
-  Fungsi ini menyediakan jembatan komunikasi (*Data SDK layer*) antara aplikasi web dan sumber data. Fungsi mendeteksi secara dinamis apakah aplikasi sedang berjalan di lingkungan produksi Google Apps Script (`typeof google !== 'undefined'`) atau sedang diuji secara lokal di browser (`file://` atau `localhost`). Jika berjalan lokal, SDK otomatis membaca dan menyimpan mutasi data ke `localStorage('bss_data')`, serta menginisialisasi database dari `STEAM_BASAMO_SEED` jika storage kosong.
-- **Kenapa dibuat seperti ini:** 
-  Arsitektur ini membuat aplikasi bersifat *zero-dependency* dan dapat diuji secara offline oleh juri/penguji tanpa perlu koneksi internet atau login ke akun Google Cloud, namun tetap dapat langsung dideploy ke Google Apps Script tanpa mengubah satu baris kode pun.
-- **Contoh:** 
-  Ketika file `basamo-index.html` dibuka langsung di browser Chrome lewat path lokal, fungsi `init()` mendeteksi lingkungan preview, memuat 52 akun dan 203 transaksi dari `STEAM_BASAMO_SEED`, menyimpannya ke `localStorage`, dan langsung merender antarmuka login.
-- **Jika input salah atau kosong:** 
-  Jika `localStorage` mengalami *corrupted JSON*, blok `try-catch` menangkap error, mencatat log peringatan, dan secara otomatis memuat ulang (*reset*) data dari basis data benih (*seed database*) asli sehingga aplikasi tidak pernah mengalami layar putih (*white screen of death*).
+### 👤 Penjelasan 5 & 6: Isra Julian Sari (Anggota / QA & Docs)
+
+#### Penjelasan 5
+- **Ditulis oleh:** Isra Julian Sari
+- **File dan fungsi:** `index.html` - objek `window.dataSdk` (fungsi `_queueRequest` dan `_processQueue`)
+- **Apa yang dilakukan:** Ini adalah pola *Request Queue* di frontend. Setiap kali aplikasi memanggil `dataSdk.create`, `update`, atau `delete`, request tidak langsung dikirim ke backend, melainkan dimasukkan ke dalam array `_requestQueue`. Fungsi `_processQueue` akan memproses antrian ini satu per satu secara berurutan (*sequential*) dengan jeda 50ms.
+- **Kenapa dibuat seperti ini:** Untuk mencegah *race condition* di sisi frontend dan menghindari membebani Google Apps Script yang memiliki limitasi eksekusi paralel. Jika user mengklik tombol "Simpan" 3x dengan cepat, request ke-2 dan ke-3 akan menunggu request ke-1 selesai.
+- **Contoh:** Jika user mengklik "Setor Tunai" 2x dalam 100ms, request pertama masuk queue dan langsung diproses. Request kedua masuk queue dan menunggu 50ms setelah request pertama selesai.
+- **Jika input salah atau kosong:** Jika array `_requestQueue` kosong, fungsi `_processQueue` akan langsung `return` dan menghentikan loop. Jika request gagal (reject), error akan ditangkap dan diteruskan ke `resolve({ isOk: false })` tanpa menghentikan antrian berikutnya.
+
+#### Penjelasan 6
+- **Ditulis oleh:** Isra Julian Sari
+- **File dan fungsi:** `index.html` - fungsi `handleTransaction` (Logika Anti-Duplikasi)
+- **Apa yang dilakukan:** Fungsi ini memproses transaksi setor/tarik tunai. Di dalam fungsi ini, ada logika khusus menggunakan `sessionStorage` untuk mencegah *double submission*. Sebelum memproses, sistem membuat `transactionKey` unik dan menyimpannya di `sessionStorage`.
+- **Kenapa dibuat seperti ini:** Karena validasi di backend saja tidak cukup untuk mencegah UX yang buruk. Jika user mengklik tombol 2x, tanpa ini, user akan melihat loading 2x dan mungkin mendapat error transaksi ganda. `sessionStorage` dipilih karena key ini hanya perlu berlaku selama 1 sesi tab browser aktif.
+- **Contoh:** Saat tombol "Proses Transaksi" diklik, `sessionStorage.setItem('currentTransaction', 'trx_0812...')` dijalankan. Jika user klik lagi sebelum selesai, sistem akan cek `sessionStorage.getItem('currentTransaction')`, menemukan nilainya ada, dan langsung memunculkan toast "Transaksi sebelumnya masih diproses...".
+- **Jika input salah atau kosong:** Key di `sessionStorage` akan selalu dihapus di blok `finally` (atau setelah transaksi sukses/gagal) menggunakan `sessionStorage.removeItem('currentTransaction')`, sehingga user bisa melakukan transaksi baru setelahnya.
 
 ---
 
-## Bagian B: Pertanyaan yang Dijawab Bersama
+## 🤝 Bagian B: Pertanyaan yang Dijawab Bersama
 
-### 1. Jika aturan bisnis utama di spesifikasi berubah (tuliskan contoh perubahannya), file dan fungsi mana yang harus diubah? Jelaskan alasannya.
-- **Contoh Perubahan Aturan Bisnis:** 
-  Sekolah memutuskan untuk memberlakukan biaya administrasi pemeliharaan tabungan syariah sebesar **Rp 500 per transaksi transfer** ke sesama nasabah (tetap gratis jika transfer ke UP Pertokoan AKL), serta menaikkan batas limit transfer harian pelajar dari **Rp 20.000 menjadi Rp 50.000**.
-- **File dan Fungsi yang Harus Diubah:**
-  1. `basamo-index.html` -> fungsi `renderTransfer()` dan `showPinModal()`: 
-     - Mengubah nilai default limit `max_transfer_pelajar` menjadi 50.000 pada validasi frontend.
-     - Menambahkan kalkulasi biaya admin Rp 500 jika `toAccount !== '085266778899'`, dan menampilkan rincian: Nominal Transfer + Biaya Admin = Total Potong Saldo pada modal konfirmasi PIN.
-  2. `basamo-Code.gs` -> fungsi `handleAtomicTransfer(transferData)`:
-     - Di sisi backend, menambahkan pengecekan akun tujuan: jika bukan rekening merchant kantin, saldo pengirim dikurangi `amount + 500`.
-     - Menambahkan pencatatan transaksi kredit biaya admin ke rekening kas sekolah/BSS.
-     - Memperbarui validasi kecukupan saldo pengirim: `if (senderBalance < totalDeduction) return { status: false, error: 'Saldo tidak mencukupi termasuk biaya admin' }`.
-- **Alasannya:** Validasi di frontend diperlukan untuk kenyamanan visual pengguna, namun validasi backend wajib diubah karena keamanan saldo tidak boleh hanya bergantung pada sisi klien yang dapat dimanipulasi melalui inspect element.
+### 1. Jika aturan bisnis utama di spesifikasi berubah, file dan fungsi mana yang harus diubah?
+**Contoh Perubahan:** "Nasabah tidak boleh melakukan transfer pada hari Minggu dan tanggal merah."
+**File & Fungsi yang diubah:**
+- **`index.html` - fungsi `showPinModal` dan `handleTransfer`:** Kami harus menambahkan logika pengecekan tanggal di awal fungsi. Misalnya, `const today = new Date(); if (today.getDay() === 0) { showToast('Transfer tidak bisa dilakukan hari Minggu'); return; }`.
+- **`kode.gs` - fungsi `handleAtomicTransfer`:** Untuk keamanan berlapis (defense in depth), pengecekan tanggal juga harus ditambahkan di backend sebelum proses transfer dimulai, agar user tidak bisa membypass validasi frontend menggunakan API call langsung.
 
----
-
-### 2. Bagaimana data mengalir dari saat pengguna mengisi form sampai hasilnya tampil di layar? Sebutkan file dan fungsi yang dilewati secara berurutan.
-Alur data transaksi transfer berjalan melalui 8 tahapan berikut secara berurutan:
-1. **Input Pengguna:** Nasabah mengisi nomor rekening tujuan (`#tf-to`) dan nominal (`#tf-amount`) pada form di `basamo-index.html`.
-2. **Lookup Target:** Event `oninput` memicu fungsi `lookupTransferTarget()` (didebounce 300ms) untuk mencari data rekening di memori lokal dan menampilkan nama penerima.
-3. **Pemicu Modal PIN:** Nasabah menekan tombol "Transfer", memicu `showPinModal()` untuk memverifikasi limit harian dan ketersediaan saldo. Jika lolos, modal `#modal-overlay` tampil.
-4. **Verifikasi PIN & Dispatch SDK:** Nasabah memasukkan 6 digit PIN. Tombol konfirmasi memicu `verifyPinAndTransfer()`. PIN dicocokkan dengan `currentUser.pin`. Jika cocok, objek `transferData` disusun dan dikirim ke `window.dataSdk.atomicTransfer(transferData)`.
-5. **Request ke Backend GAS:** Di dalam Data SDK, `google.script.run.withSuccessHandler(...).handleAtomicTransfer(transferData)` dipanggil untuk mengirim payload ke server Google Apps Script.
-6. **Eksekusi Atomik di Server:** Di `basamo-Code.gs`, fungsi `handleAtomicTransfer()`:
-   - Mengambil kunci thread via `acquireLock_('atomic_transfer')`.
-   - Mengurangi saldo pengirim via `updateSheetRowOptimistic_('users', ...)`.
-   - Menambah saldo penerima via `updateSheetRowOptimistic_('users', ...)`.
-   - Mencatat mutasi ke sheet `transactions`.
-   - Menghapus cache lama via `invalidateCache_()`.
-   - Mengambil seluruh dataset terbaru via `getAllData()`.
-   - Melepaskan kunci via `releaseLock_()`.
-7. **Callback Success Handler:** Hasil `{ status: true, allData: [...] }` diterima oleh callback `withSuccessHandler` di `basamo-index.html`.
-8. **Re-render UI:** SDK memanggil `window._dataHandler.onDataChanged(allData)`. Fungsi `softUpdateUI()` atau `renderContent()` dijalankan untuk memperbarui angka saldo di header dashboard, memperbarui daftar mutasi di tabel riwayat, dan memunculkan toast sukses: *"Transfer berhasil diproses!"*.
-
----
+### 2. Bagaimana data mengalir dari saat pengguna mengisi form sampai hasilnya tampil di layar?
+**Alur Data (Contoh: Setor Tunai):**
+1. **User Input:** Teller mengisi form dan klik "Proses Transaksi" di `index.html`.
+2. **Frontend Validation:** Fungsi `handleTransaction` memvalidasi input (cek saldo, cek PIN Teller, cek anti-duplikasi `sessionStorage`).
+3. **Frontend Request:** Memanggil `window.dataSdk.create(transactionData)`. Request masuk ke `_queueRequest`.
+4. **Bridge ke Backend:** `dataSdk` memanggil `google.script.run.withSuccessHandler(...).handleCreate(data)`.
+5. **Backend Processing (`kode.gs`):** Fungsi `handleCreate` dipanggil. Ia mendapatkan *Lock* (`acquireLock_`), membuat UUID, menyimpan JSON ke Google Sheets via `writeSheetRowsBatch_`, dan meng-invalidate cache (`invalidateCache_`).
+6. **Backend Response:** Backend mengembalikan objek `{ status: true, allData: [...] }`.
+7. **Frontend Update:** `dataSdk` menerima data, mengupdate `_lastDataHash`, dan memanggil `window._dataHandler.onDataChanged(res.allData)`.
+8. **UI Rendering:** `dataHandler` mengupdate variabel global `allData`, mencari data user yang terupdate, dan memanggil `softUpdateUI()` untuk merender ulang saldo di layar tanpa reload halaman.
 
 ### 3. Pilih satu unit test. Apa yang diuji, dan dalam kondisi apa test itu akan gagal?
-- **Unit Test yang Dipilih:** Kasus Uji **U02 (Validasi Anti-Transfer ke Rekening Sendiri)**.
-- **Apa yang Diuji:** 
-  Sistem harus memastikan bahwa nasabah tidak dapat memasukkan nomor rekening/nomor teleponnya sendiri sebagai rekening tujuan transfer.
-- **Kondisi Test Akan Gagal:**
-  Test ini akan gagal jika:
-  1. Frontend mengizinkan modal PIN terbuka meskipun nilai input `#tf-to` sama persis dengan `currentUser.phone`.
-  2. Di sisi backend, fungsi `handleAtomicTransfer` tidak memiliki pengecekan `if (fromAccount === toAccount)`. Jika kondisi ini lolos, sistem akan memotong saldo akun lalu menambahkan saldo ke akun yang sama persis, menghasilkan mutasi semu dan berpotensi memicu kegagalan pembaruan baris karena dua operasi OCC mencoba memperbarui satu baris ID yang sama dalam satu eksekusi.
-
----
+**Test yang dipilih:** TC-10 (Input Jumlah Negatif/Huruf) pada fungsi `parseRupiah` dan `handleTransaction`.
+- **Apa yang diuji:** Menguji apakah sistem mampu menolak atau membersihkan input jumlah transaksi yang berisi huruf atau tanda negatif.
+- **Kondisi gagal:** Test akan **GAGAL** jika user berhasil memasukkan "Rp -50.000" atau "Rp abc" dan sistem memprosesnya sebagai transaksi valid (saldo bertambah/berkurang).
+- **Cara kerja di kode:** Fungsi `parseRupiah` menggunakan regex `.replace(/[^\d]/g, '')` yang otomatis menghapus semua karakter kecuali angka. Jika input "abc", hasilnya `0`. Di `handleTransaction`, ada validasi `if (!amount || amount <= 0) { showToast('Masukkan jumlah yang valid'); return; }`. Karena hasilnya 0, validasi ini akan menangkapnya dan membatalkan transaksi.
 
 ### 4. Pilih satu saran AI yang kalian tolak. Apa sarannya dan kenapa kalian menolaknya?
-- **Saran AI yang Ditolak:** 
-  AI menyarankan untuk menggunakan teknik *polling interval* (memasang `setInterval` setiap 2 detik) di frontend untuk terus-menerus memanggil `google.script.run.getAllData()` agar saldo nasabah di layar selalu terupdate secara otomatis jika ada transfer masuk dari orang lain.
-- **Alasan Menolak:**
-  Kami menolak saran ini secara tegas karena:
-  1. **Batas Kuota Google Apps Script:** Google membatasi total waktu eksekusi Google Apps Script per hari (maksimal 60–90 menit per hari untuk akun Google standar). Jika ada 30 siswa yang membuka aplikasi secara bersamaan dan melakukan polling setiap 2 detik, kuota eksekusi Google Apps Script akan habis dalam waktu kurang dari 1 jam, menyebabkan aplikasi lumpuh total (*Service invoked too many times for one day*).
-  2. **Beban Jaringan:** Polling berulang-ulang memboroskan kuota internet siswa di sekolah.
-  3. **Solusi yang Lebih Baik:** Kami memilih pendekatan *Event-Driven Refresh*, di mana saldo diperbarui seketika setiap kali pengguna melakukan aksi transaksi, atau tombol manual refresh ditekan.
-
----
+**Saran AI yang ditolak:** "Ganti `LockService.getScriptLock()` dengan `LockService.getUserLock()` di `kode.gs` untuk memungkinkan *concurrent access* dari user berbeda."
+**Alasan Penolakan:** 
+Kami menolak saran ini karena kami sudah mempelajari dokumentasi Google Apps Script. `UserLock` hanya mengunci eksekusi berdasarkan *email user yang sedang login*. Karena aplikasi BSS kami diakses oleh banyak role (Teller, Admin, Nasabah) yang mungkin tidak selalu login dengan Google Account pribadi (atau menggunakan mode *Anyone can access*), `UserLock` tidak akan efektif mencegah *race condition* saat dua Teller mengedit nasabah yang sama di Google Sheets. `ScriptLock` (yang mengunci di level skrip/database) jauh lebih aman untuk kasus *shared database* seperti Google Sheets kami.
 
 ### 5. Bagian kode mana yang paling sulit dipahami, dan bagaimana kalian akhirnya memahaminya?
-- **Bagian Kode Paling Sulit:** 
-  Blok penanganan *Optimistic Concurrency Control (OCC)* yang digabungkan dengan *Rollback Logic* pada baris 518–575 di `basamo-Code.gs`:
-  ```javascript
-  const senderSuccess = updateSheetRowOptimistic_('users', sender.__backendId, JSON.stringify(senderUpdated), senderVersion);
-  if (!senderSuccess) return { status: false, error: '...' };
+**Bagian tersulit:** Logika *rollback* pada `handleAtomicTransfer` di `kode.gs`, khususnya baris:
+`__version: (sender.__version || 1) + 2` saat melakukan rollback saldo pengirim.
+**Bagaimana kami memahaminya:**
+Awalnya, kami (terutama Mutya) bingung kenapa harus `+2` dan bukan `+1`. AI tidak menjelaskan alasannya dengan jelas. Kami akhirnya memahami dengan cara **menggambar alur state di papan tulis (whiteboard)**:
+1. Saldo awal: `version = 1`.
+2. Update saldo pengirim (tahap 1): `version` menjadi `1 + 1 = 2`. (Data di sheet sekarang versi 2).
+3. Update saldo penerima GAGAL (tahap 2).
+4. Rollback saldo pengirim: Kita harus mengupdate data yang *sekarang* berada di versi 2. Agar *optimistic locking* di fungsi `updateSheetRowOptimistic_` menerima update ini, `expectedVersion` harus `currentVersion + 1` (yaitu 2 + 1 = 3).
+5. Maka, saat membuat objek rollback, kita harus langsung set `__version` menjadi `1 + 2 = 3`. 
+Setelah menggambar alur ini, kami langsung paham dan memperbaiki kode AI yang awalnya hanya menulis `+1`.
 
-  const targetSuccess = updateSheetRowOptimistic_('users', targetFresh.__backendId, JSON.stringify(targetUpdated), targetVersion);
-  if (!targetSuccess) {
-    // Rollback saldo pengirim
-    const senderRollback = Object.assign({}, sender, { balance: senderBalance, __version: senderVersion + 1, ... });
-    updateSheetRowOptimistic_('users', sender.__backendId, JSON.stringify(senderRollback), senderRollback.__version);
-    return { status: false, error: 'Gagal menambahkan saldo penerima. Transaksi dibatalkan (saldo Anda aman).' };
-  }
-  ```
-- **Bagaimana Kami Akhirnya Memahaminya:** 
-  Awalnya kami bingung mengapa jika penambahan saldo penerima gagal, kita harus menaikkan versi pengirim lagi saat melakukan rollback (`senderVersion + 1`), bukan mengembalikannya ke versi lama. Kami memahaminya setelah menggambar diagram alur status (*state diagram*) di papan tulis:
-  1. Saat saldo pengirim terpotong, versinya di spreadsheet sudah berubah dari versi $N$ menjadi $N+1$.
-  2. Jika proses penerima gagal, kita tidak bisa menulis balik data lama pengirim dengan nomor versi $N$, karena spreadsheet saat ini sudah berada di versi $N+1$!
-  3. Oleh karena itu, operasi rollback pada hakikatnya adalah sebuah operasi *update baru* yang mengembalikan nilai saldo lama namun tetap menaikkan versi menjadi $N+2$. Dengan memahami konsep ini, kami mengerti esensi arsitektur *immutable state transition* dan konsistensi data perbankan.
+---
+> **Dokumen ini ditandatangani secara digital melalui commit GitHub oleh masing-masing anggota tim pada tanggal 15 Oktober 2026.**
