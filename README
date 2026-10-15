@@ -46,14 +46,6 @@ Minimal satu tangkapan layar untuk setiap langkah alur inti, termasuk hasil chan
 1. Halaman Login Nasabah : https://drive.google.com/file/d/1V_2cNWlY2wDsz8WCUVj4sc-s3FiYnIxw/view?usp=drive_link 
 2. Dasboard Nasabah      : https://drive.google.com/file/d/1V0IsnXC8TVpc1QnYbISqCXU_6OphvKpX/view?usp=sharing
 
-## Cara Menjalankan Pengujian
-
-```
-perintah untuk menjalankan test
-```
-
-Hasil yang diharapkan: semua test lulus.
-
 ## Fitur
 
 ### 🔒 Keamanan & Autentikasi
