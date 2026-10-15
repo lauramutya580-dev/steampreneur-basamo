@@ -17,12 +17,3 @@
 | 11 | **Bug Hunt:** Uji coba alur inti, cari bug, catat di `catatan-bug.md` dan perbaiki | Isra Julian Sari | Catatan bug dan test selesai, tidak ada bug kritis yang tersisa | 60 menit | 60 menit | ✅ Selesai |
 | 12 | **Change Request:** Implementasi fitur tambahan (filter kelas, sort saldo, cetak data filtered) | Tim (Semua) | Semua kasus uji lama dan baru lulus, filter & sort berjalan akurat | 60 menit | 60 menit | ✅ Selesai |
 | 13 | **Dokumentasi dan Refleksi:** Tulis README, spesifikasi produk, dan refleksi tim | Isra Julian Sari | README bisa diikuti orang lain, semua file dokumentasi lengkap | 60 menit | 60 menit | ✅ Selesai |
-
----
-
-##  Catatan Rencana Kerja
-
-1. **Fleksibilitas:** Rencana ini bersifat dinamis. Jika ada langkah yang membutuhkan waktu lebih dari 60 menit, langkah tersebut akan dipecah lagi menjadi sub-langkah yang lebih kecil.
-2. **Kolaborasi:** Untuk langkah yang melibatkan 2 orang (seperti No. 4), satu orang fokus di backend (API) dan satu orang fokus di frontend (UI), kemudian digabungkan.
-3. **Quality Assurance:** Isra Julian Sari akan mulai melakukan pengujian (Bug Hunt) sejak langkah ke-6 untuk memastikan fitur yang sudah jadi langsung diverifikasi, bukan menunggu semua fitur selesai.
-4. **Change Request:** Fitur tambahan (Change Request) baru dikerjakan setelah alur inti (No. 1-10) benar-benar stabil dan bebas bug kritis.
