@@ -39,16 +39,12 @@ login untuk data awal, berikut data contoh :
 |nasabah|082177903994|123456|
 
 
-### Jika terjadi masalah
-
-Tuliskan masalah yang mungkin muncul dan cara mengatasinya (misalnya port sudah dipakai).
-
 ## Tangkapan Layar Alur Inti
 
 Minimal satu tangkapan layar untuk setiap langkah alur inti, termasuk hasil change request. Simpan gambar di `docs/bukti/`.
 
-1. Langkah 1: ![Langkah 1](docs/bukti/langkah-1.png)
-2. Langkah 2: ![Langkah 2](docs/bukti/langkah-2.png)
+1. Halaman Login Nasabah : https://drive.google.com/file/d/1V_2cNWlY2wDsz8WCUVj4sc-s3FiYnIxw/view?usp=drive_link 
+2. Dasboard Nasabah      : https://drive.google.com/file/d/1V0IsnXC8TVpc1QnYbISqCXU_6OphvKpX/view?usp=sharing
 
 ## Cara Menjalankan Pengujian
 
