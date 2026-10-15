@@ -1,17 +1,38 @@
-# Dependensi dan hasil build (jangan diunggah)
+# ==========================================
+# BSS - Bank Syariah Sekolah .gitignore
+# ==========================================
+
+# 1. Dependensi dan hasil build (jangan diunggah)
 node_modules/
 vendor/
 dist/
 build/
 .next/
 .cache/
+.clasp/
 
-# File rahasia: password, API key, token
+# 2. File rahasia: password, API key, token, kredensial
 .env
 .env.*
 !.env.example
+credentials.json
+token.json
+service-account.json
+*.key
+*.pem
 
-# File sistem dan editor
+# 3. File sistem, OS, dan editor
 .DS_Store
 Thumbs.db
+desktop.ini
 *.log
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 4. Google Apps Script & Clasp specific (jika menggunakan CLI Clasp)
+.claspignore
+appsscript.json.bak
+*.gs~
