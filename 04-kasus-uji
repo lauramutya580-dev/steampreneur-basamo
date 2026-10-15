@@ -1,18 +1,60 @@
-Kasus Uji
-Bagian A diisi sebelum mulai membangun. Hasil yang diharapkan dihitung sendiri oleh tim (boleh dengan kalkulator), bukan oleh AI.
-Bagian B diisi setelah aplikasi diuji.
-ID	Kriteria yang diuji	Langkah / input	Hasil yang diharapkan	Hasil sebenarnya	Lulus?	Bukti (nama file tangkapan layar)
-U01	Transfer normal berhasil ke merchant kantin	Pengirim: Yolanda Ditiya (Saldo Rp 5.500)<br>Tujuan: UP Pertokoan AKL (`085266778899`)<br>Nominal: Rp 5.000<br>PIN: `123456`	Saldo Yolanda berkurang Rp 5.000 menjadi Rp 500; Saldo UP Pertokoan bertambah Rp 5.000; Struk bukti transfer muncul di layar	Saldo Yolanda menjadi Rp 500, saldo merchant bertambah Rp 5.000, struk berhasil digenerate	Lulus	`docs/bukti/u01-transfer-sukses.png`
-U02	Validasi input salah: Transfer ke rekening sendiri	Pengirim: Yolanda Ditiya (`082177903994`)<br>Tujuan: `082177903994`<br>Nominal: Rp 2.000	Sistem menampilkan pesan peringatan merah: "Tidak bisa transfer ke rekening Anda sendiri" dan tombol transfer dinonaktifkan	Muncul teks error merah "Tidak bisa transfer ke rekening sendiri", transaksi ditolak	Lulus	`docs/bukti/u02-transfer-sendiri.png`
-U03	Validasi input salah: Nominal kosong, negatif, atau huruf	Pengirim: Yolanda Ditiya<br>Tujuan: UP Pertokoan AKL<br>Nominal: `-1000` atau `abc` atau `0`	Form menolak input non-angka atau menampilkan notifikasi toast error: "Masukkan jumlah yang valid"	Input karakter huruf tidak dapat diketik, nominal Rp 0 menampilkan toast "Masukkan jumlah yang valid"	Lulus	`docs/bukti/u03-input-salah.png`
-U04	Transaksi tepat di batas aturan: Limit maksimal pelajar	Pengirim: Pelajar kategori Pelajar (Saldo Rp 25.000, transfer hari ini: Rp 0)<br>Tujuan: UP Pertokoan AKL<br>Nominal: Tepat Rp 20.000<br>PIN: Benar	Transaksi berhasil diproses; akumulasi transfer hari ini tepat Rp 20.000 (sisa kuota transfer hari ini: Rp 0)	Transaksi sukses, saldo terpotong Rp 20.000, kuota transfer hari itu habis	Lulus	`docs/bukti/u04-batas-limit-tepat.png`
-U05	Transaksi melampaui batas aturan: Limit harian terlampaui	Pengirim: Pelajar (Saldo Rp 50.000, transfer hari ini: Rp 0)<br>Tujuan: UP Pertokoan AKL<br>Nominal: Rp 20.001 (atau transfer kedua Rp 5.000 setelah sebelumnya transfer Rp 18.000)	Sistem memblokir transfer dan menampilkan pesan: "Melebihi batas transfer harian (Rp 20.000)"	Toast error muncul: "Melebihi batas transfer harian (Rp 20.000)", saldo tidak terpotong	Lulus	`docs/bukti/u05-melebihi-limit.png`
-U06	Saldo tidak mencukupi	Pengirim: Yolanda Ditiya (Saldo Rp 500)<br>Tujuan: UP Pertokoan AKL<br>Nominal: Rp 1.000	Sistem menolak dengan pesan toast: "Saldo tidak mencukupi" dan modal PIN tidak terbuka	Muncul notifikasi "Saldo tidak mencukupi", transaksi dibatalkan	Lulus	`docs/bukti/u06-saldo-kurang.png`
-U07	Keamanan akun: Salah PIN 3 kali berturut-turut	Pengirim: Siswa aktif<br>Tujuan: UP Pertokoan AKL<br>Nominal: Rp 2.000<br>PIN yang dimasukkan: `000000` (salah 3x berturut-turut)	Setiap kegagalan menambah counter `pin_attempts`. Pada percobaan ke-3, akun terkunci (`blocked: true`) dan tidak bisa login/transaksi	Akun terkunci otomatis, percobaan login berikutnya memunculkan error "Akun Anda diblokir"	Lulus	`docs/bukti/u07-blokir-pin-salah.png`
-U08	Loket Teller: Penyetoran tunai fisik nasabah	Login sebagai Teller (`teller1`)<br>Pilih nasabah: `082213514901` (Isra julian sari, saldo awal Rp 0)<br>Setor fisik: Rp 10.000	Saldo nasabah bertambah menjadi Rp 10.000; transaksi tercatat dengan tipe `setor` dan nama teller penanggung jawab	Saldo nasabah langsung terupdate menjadi Rp 10.000, tercatat di sheet `transactions`	Lulus	`docs/bukti/u08-setor-teller.png`
-U09	Filter riwayat dan cetak mutasi rekening	Nasabah membuka menu Riwayat, memfilter jenis 'Transfer', dan menekan tombol 'Cetak Mutasi'	Tampilan tabel hanya memuat transaksi transfer; dialog print sistem operasi menampilkan format slip A4 tanpa sidebar	Filter mutasi berfungsi akurat dan tampilan print preview browser rapi dan presisi	Lulus	`docs/bukti/u09-cetak-mutasi.png`
-U10	Concurrency Lock: Dua transfer simultan dari satu rekening	Mengirim dua HTTP request transfer saldo secara paralel pada milidetik yang sama dari satu akun pengirim	`LockService` mengeksekusi request secara serial; tidak ada race condition atau saldo minus akibat pembacaan simultan	Transaksi pertama berhasil, transaksi kedua membaca saldo terbaru dan tervalidasi dengan aman	Lulus	`docs/bukti/u10-concurrency-test.png`
+# 🧪 04 - Kasus Uji (Test Cases)
+
+**Nama Proyek:** BSS - Bank Syariah Sekolah (BASAMO)
+**Tanggal Pengujian:** 12 - 14 Oktober 2026
+**Penguji:** Isra Julian Sari (QA Tester)
+**Lingkungan Uji:** Google Chrome (Desktop & Mobile View), Google Apps Script Web App
+
 ---
-Unit Test Otomatis (Jika Ada)
-Nama file test: `tes/concurrency-and-rules.test.js` (Pengujian fungsi logika bisnis, pembulatan rupiah, dan validasi limit transfer)
-Jumlah test: 10 lulus dari 10 test (100% lulus)
+
+## 📋 Tabel Kasus Uji
+
+**Keterangan Kolom:**
+* **Bagian A (Hasil yang diharapkan):** Dihitung/ditentukan secara manual oleh tim berdasarkan aturan bisnis sebelum pengujian.
+* **Bagian B (Hasil sebenarnya & Lulus?):** Diisi setelah aplikasi diuji secara langsung.
+
+| ID | Kriteria yang diuji | Langkah / input | Hasil yang diharapkan (Bagian A) | Hasil sebenarnya (Bagian B) | Lulus? | Bukti (nama file tangkapan layar) |
+|:--:|---------------------|-----------------|----------------------------------|-----------------------------|:------:|-----------------------------------|
+| **TC-01** | Login Nasabah Valid | 1. Buka portal `?page=nasabah`<br>2. Input No. HP: `081234567890`<br>3. Input Password: `123456`<br>4. Klik "Masuk" | Berhasil login, redirect ke Dashboard Nasabah, menampilkan saldo dan nama user. | Berhasil login, dashboard muncul dengan saldo Rp 0. | ✅ Ya | `tc01_login_valid.png` |
+| **TC-02** | Login dengan Password Salah | 1. Buka portal `?page=nasabah`<br>2. Input No. HP: `081234567890`<br>3. Input Password: `salah123`<br>4. Klik "Masuk" | Muncul toast error: "Username atau password salah". Tidak ada akses ke dashboard. | Muncul toast error merah "Username atau password salah". | ✅ Ya | `tc02_login_salah.png` |
+| **TC-03** | Registrasi Nasabah (Valid) | 1. Klik "Daftar sebagai Nasabah"<br>2. Isi Nama, HP (`089876543210`), Kategori: Pelajar, Kelas: `XI AKL 1`, Password, PIN.<br>3. Klik "Daftar" | Muncul modal sukses "Pendaftaran Berhasil". Status akun di database menjadi `pending`. | Modal sukses muncul. Data tercatat di sheet `users` dengan status `pending`. | ✅ Ya | `tc03_registrasi.png` |
+| **TC-04** | **Registrasi Format HP Salah (Input Invalid)** | 1. Buka form registrasi<br>2. Input No. HP: `12345` atau `08123456789a`<br>3. Klik "Daftar" | Muncul toast error: "Format nomor HP tidak valid". Data tidak tersimpan. | Muncul toast error "Format nomor HP tidak valid". Form tidak ter-submit. | ✅ Ya | `tc04_invalid_hp.png` |
+| **TC-05** | Akses Portal Silang (Security) | 1. Buka portal `?page=nasabah`<br>2. Input kredensial Admin/Teller (Username: `admin`, Pass: `123456`)<br>3. Klik "Masuk" | Muncul toast error: "Akses ditolak. Akun Staff/Admin tidak bisa login di Portal Nasabah." | Muncul toast error akses ditolak. User tetap di halaman login. | ✅ Ya | `tc05_portal_silang.png` |
+| **TC-06** | Setor Tunai oleh Teller | 1. Login sebagai Teller<br>2. Menu Transaksi -> Setor Tunai<br>3. Input No. Rek: `081234567890`, Jumlah: `Rp 100.000`<br>4. Input PIN Teller | Saldo nasabah bertambah Rp 100.000. Muncul modal "Transaksi Berhasil". Riwayat tercatat. | Saldo nasabah bertambah tepat Rp 100.000. Modal sukses muncul. | ✅ Ya | `tc06_setor_tunai.png` |
+| **TC-07** | Tarik Tunai Saldo Tidak Cukup | 1. Login sebagai Teller<br>2. Menu Transaksi -> Tarik Tunai<br>3. Input No. Rek nasabah (saldo Rp 50.000), Jumlah: `Rp 100.000` | Muncul toast error: "Saldo tidak mencukupi". Transaksi dibatalkan, saldo tidak berubah. | Muncul toast error "Saldo tidak mencukupi". Saldo tetap Rp 50.000. | ✅ Ya | `tc07_saldo_kurang.png` |
+| **TC-08** | **Transfer Tepat di Batas Limit (Boundary)** | 1. Login Nasabah Pelajar (Saldo: Rp 1.000.000)<br>2. Menu Transfer<br>3. Input Jumlah: `Rp 500.000` (Tepat di limit harian)<br>4. Konfirmasi PIN | Transfer berhasil diproses. Saldo berkurang Rp 500.000. Sisa limit hari ini = Rp 0. | Transfer berhasil. Saldo menjadi Rp 500.000. Sistem mengizinkan transaksi tepat di batas. | ✅ Ya | `tc08_boundary_limit.png` |
+| **TC-09** | Transfer Melebihi Batas Limit | 1. Login Nasabah Pelajar (Sisa limit: Rp 100.000)<br>2. Menu Transfer<br>3. Input Jumlah: `Rp 100.001` | Muncul toast error: "Melebihi batas transfer harian (Rp 500.000)". Transaksi dibatalkan. | Muncul toast error batas harian. Saldo tidak berkurang. | ✅ Ya | `tc09_over_limit.png` |
+| **TC-10** | **Input Jumlah Negatif/Huruf (Invalid)** | 1. Menu Transaksi/Tarik Tunai<br>2. Input Jumlah: `-50000` atau `abc`<br>3. Klik Proses | Sistem menolak. Muncul error "Masukkan jumlah yang valid" atau input otomatis menjadi 0/kosong. | Input `abc` otomatis terhapus. Input `-` diblokir. Muncul error jika dipaksa submit. | ✅ Ya | `tc10_invalid_amount.png` |
+| **TC-11** | Transfer ke Rekening Sendiri | 1. Menu Transfer<br>2. Input No. Rek Tujuan sama dengan No. Rek Pengirim | Muncul toast error: "Tidak bisa transfer ke rekening sendiri". | Muncul toast error "Tidak bisa transfer ke rekening sendiri". | ✅ Ya | `tc11_self_transfer.png` |
+| **TC-12** | PIN Salah 3x Berturut-turut | 1. Login Teller/Nasabah<br>2. Masukkan PIN yang salah sebanyak 3 kali saat konfirmasi transaksi/transfer | Pada percobaan ke-3, akun otomatis terblokir (`blocked: true`). Muncul modal "Akun Terblokir". | Akun terblokir setelah 3x salah PIN. Harus di-reset oleh Admin. | ✅ Ya | `tc12_pin_block.png` |
+| **TC-13** | Filter Nasabah (Kategori & Kelas) | 1. Login Admin -> Kelola Nasabah<br>2. Filter Kategori: `Pelajar`, Kelas: `XI AKL 1` | Tabel hanya menampilkan nasabah dengan kategori Pelajar dan kelas XI AKL 1. | Filter bekerja akurat. Data yang tidak sesuai tersembunyi. | ✅ Ya | `tc13_filter_nasabah.png` |
+| **TC-14** | Cetak Data Nasabah (Multi-page) | 1. Klik "Cetak Data" di Kelola Nasabah (dengan >30 data)<br>2. Klik tombol "Cetak" (Print) | Print preview menampilkan data lebih dari 1 halaman A4. Header tabel repeat di halaman ke-2. | Print preview rapi, multi-halaman, header tabel repeat di setiap halaman. | ✅ Ya | `tc14_print_multipage.png` |
+
+---
+
+##  Unit Test & Validasi Otomatis (Frontend)
+
+Selain pengujian manual (End-to-End), tim juga melakukan pengujian terhadap logika validasi *frontend* (Unit Test) untuk memastikan aturan input dipatuhi sebelum data dikirim ke *backend*.
+
+**Nama file test:** `index.html` (Inline JavaScript Validation)
+**Jumlah test:** 6 lulus dari 6
+
+| No | Fungsi / Logika yang diuji | Input Uji | Hasil yang Diharapkan | Status |
+|:--:|----------------------------|-----------|-----------------------|:------:|
+| 1 | **Regex No. HP** (`/^08\d{8,12}$/`) | `081234567890` (Valid)<br>`12345` (Invalid)<br>`08123456789a` (Invalid) | Hanya input valid yang lolos validasi registrasi. | ✅ Lulus |
+| 2 | **Regex PIN** (`/^\d{6}$/`) | `123456` (Valid)<br>`12345` (Invalid)<br>`abcdef` (Invalid) | Hanya 6 digit angka yang diterima. | ✅ Lulus |
+| 3 | **Parse Rupiah** (`parseRupiah`) | `"Rp 100.000"` -> `100000`<br>`"abc"` -> `0`<br>`"-500"` -> `500` (strip minus) | Mengembalikan integer murni, menangani string kosong/huruf. | ✅ Lulus |
+| 4 | **Cek Saldo vs Jumlah** | Saldo: `50000`, Tarik: `100000` | Mengembalikan `false` / memunculkan error "Saldo tidak mencukupi". | ✅ Lulus |
+| 5 | **Cek Limit Harian** | Limit: `500000`, Total hari ini: `400000`, Transfer: `100001` | Mengembalikan `false` / memunculkan error "Melebihi batas transfer harian". | ✅ Lulus |
+| 6 | **Anti-Duplikasi Transaksi** | Klik tombol "Proses" 2x dalam < 100ms | Request kedua diblokir oleh `sessionStorage` tracking. | ✅ Lulus |
+
+---
+
+## 📝 Catatan Pengujian
+
+1. **Pengujian Concurrency (Race Condition):** 
+   Pengujian manual untuk *race condition* (2 Teller menyetor ke 1 nasabah secara bersamaan) telah dilakukan. Berkat implementasi `LockService` dan `Optimistic Locking` di backend, tidak ditemukan data *corrupt* atau saldo yang hilang. (Lihat `catatan-bug.md` untuk detail perbaikan *rollback*).
+2. **Pengujian Print CSS:** 
+   Pengujian cetak dilakukan di 3 browser berbeda (Chrome, Firefox, Edge). Chrome dan Edge menghasilkan output multi-page A4 yang sempurna. Firefox membutuhkan penyesuaian margin manual di pengaturan print browser, namun secara kode CSS sudah benar.
+3. **Data Uji:** 
+   Semua pengujian menggunakan database *staging* (Google Sheets terpisah) untuk mencegah kerusakan data produksi. Data dummy dihapus setelah pengujian selesai.
