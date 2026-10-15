@@ -31,7 +31,7 @@ LOGIN untuk nasabah : steampreneur-basamo-nasabah.blogspot.com
 
 ### Akun atau data contoh
 
-Jika website memerlukan login atau data awal, tuliskan di sini. Gunakan data contoh, bukan data sungguhan.
+login untuk data awal, berikut data contoh :
 
 | Peran | Username | Password |
 |direktur|direktur|direktur123|
@@ -65,7 +65,7 @@ Hasil yang diharapkan: semua test lulus.
 ## Batasan yang Diketahui
 
 Apa yang belum bisa dilakukan atau masih kurang?
--
+- scan menggunakan Barcode
 
 ## Struktur Folder
 
@@ -90,8 +90,6 @@ Cantumkan library, template, gambar, ikon, atau font yang dipakai beserta lisens
 
 ## Tim
 
-Jangan cantumkan nomor HP, alamat, atau email.
-
-| Nama | Peran |
-|---|---|
-| | |
+| MUTYA LAURA | Ketua Tim |
+| CANTIKA AMELIAN | Anggota |
+| ISRA JULIAN SARI | Anggota |
