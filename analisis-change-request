@@ -1,16 +1,14 @@
-# Analisis Change Request
+#  Analisis Change Request
 
-Isi bagian ini **sebelum** mengubah kode, lalu commit dan push (contoh pesan: `dokumen: analisis change request`). Juri memeriksa bahwa commit ini muncul sebelum commit perubahan kode.
+Isi bagian ini **sebelum** mengubah kode, lalu commit dan push (contoh pesan commit: `docs: analisis change request fitur pencarian, filter, dan ekspor CSV`). Juri memeriksa bahwa commit ini muncul sebelum commit perubahan kode.
 
-**Change request:** Pencarian, filter, dan ekspor CSV pada riwayat transaksi dan buku kas (Tugas 3 di lembar challenge STEAMpreneur).
+---
+
+**Change request:** Penyempurnaan fitur Pencarian & Filter, serta Penambahan Ekspor Data ke format CSV (sesuai Tugas 3 lembar challenge).
 
 **Kriteria penerimaan yang akan dipenuhi dan cara kami memenuhinya:**
-1. **Fitur Pencarian (Search):** Pengguna (nasabah/staff/direktur) dapat mencari mutasi berdasarkan kata kunci: nama pengirim, nama penerima, keterangan belanja, atau nomor rekening/telepon secara *real-time* (instan tanpa refresh).
-   - *Cara pemenuhan:* Menambahkan input pencarian dengan *debounce 250ms* yang memfilter array `transactions` di memori berdasarkan pencocokan substring `toLowerCase()`.
-2. **Fitur Filter Berjenjang:** Pengguna dapat memfilter mutasi berdasarkan **Tipe Transaksi** (Semua, Transfer, Setor Tunai, Tarik Tunai) dan **Rentang Tanggal** (Hari Ini, 7 Hari Terakhir, Bulan Ini, atau kustom).
-   - *Cara pemenuhan:* Menambahkan dropdown filter dan date picker yang menyaring array sebelum dikirim ke fungsi `renderHistoryRows()`.
-3. **Fitur Ekspor CSV:** Pengguna dapat mengunduh seluruh baris mutasi yang tampil (sesuai filter aktif) ke dalam berkas format `.csv` berstandar internasional yang dapat dibuka langsung di Microsoft Excel atau Google Sheets.
-   - *Cara pemenuhan:* Membuat fungsi generator CSV sisi klien yang merangkai header dan baris dengan pemisah koma, membungkus teks dengan tanda petik, menambahkan BOM UTF-8 (`\uFEFF`) agar karakter khusus dan format Rupiah terbaca sempurna di Excel, lalu memicu download via elemen `<a>` sementara.
+1. **Pencarian & Filter:** User (Admin/Direktur) dapat mencari nasabah berdasarkan nama, nomor rekening, atau kelas, serta memfilter berdasarkan kategori (Pelajar/Umum) dan status. *(Sudah sebagian diimplementasi, akan disempurnakan dan distandarisasi).*
+2. **Ekspor CSV:** User dapat mengekspor data hasil pencarian/filter (Nasabah atau Riwayat Transaksi) ke dalam file `.csv` yang kompatibel dengan Microsoft Excel dan Google Sheets, lengkap dengan dukungan karakter UTF-8 (BOM) untuk huruf Indonesia.
 
 ---
 
@@ -18,27 +16,32 @@ Isi bagian ini **sebelum** mengubah kode, lalu commit dan push (contoh pesan: `d
 
 | Bagian yang terdampak | File / fungsi | Perubahan yang diperlukan |
 |---|---|---|
-| **Spesifikasi** | `01-spesifikasi.md` | Menambahkan fitur pencarian mutasi, filter tanggal/tipe, dan ekspor CSV ke dalam daftar Fitur Wajib (Bagian 4) serta Kriteria Selesai (Bagian 8). |
-| **Kode Antarmuka (Frontend)** | `basamo-index.html` -> fungsi `renderHistory()`, `renderHistoryRows()`, dan `exportToCSV()` | Menambahkan elemen input search bar, dropdown filter tipe transaksi, date input filter, tombol "Ekspor CSV", serta fungsi logika pembentukan berkas CSV. |
-| **Kode Layanan Data** | `basamo-index.html` -> fungsi helper filtering | Menjaga agar pemfilteran berjalan cepat di sisi klien (*in-memory array filter*) tanpa membebani pemanggilan I/O backend. |
-| **Kasus Uji / Test** | `04-kasus-uji.md` & test suite | Menambahkan kasus uji CR-01 (Pencarian nama/keterangan), CR-02 (Filter jenis transaksi & tanggal), dan CR-03 (Validasi keutuhan dan format file CSV yang diunduh). |
-| **README** | `README.md` & `README-template.md` | Menambahkan dokumentasi cara menggunakan filter mutasi dan tombol ekspor CSV pada bagian fitur dan tangkapan layar. |
+| **Spesifikasi** | `docs/01-spesifikasi-produk.md` | Menambahkan detail format file `.csv` dan aturan encoding (UTF-8 BOM) pada bagian "Fitur Laporan & Pencetakan" (Fitur No. 16 & 18). |
+| **Kode** | `index.html` | 1. Menambahkan tombol "Ekspor CSV" di halaman Kelola Nasabah dan Riwayat Transaksi.<br>2. Membuat fungsi utilitas `exportToCSV(data, headers, filename)` yang menangani konversi array of objects ke string CSV dengan BOM.<br>3. Menghubungkan tombol ekspor dengan state `filterNasabah` dan `filterHistory` agar yang diekspor hanya data yang sedang tampil/difilter. |
+| **Kode** | `kode.gs` | **Tidak ada perubahan.** Ekspor CSV akan diproses sepenuhnya di sisi *client-side* (browser) menggunakan JavaScript untuk menghemat quota eksekusi Google Apps Script dan mempercepat respons UI. |
+| **Kasus uji / test** | `docs/04-kasus-uji.md` | Menambahkan 4 kasus uji baru (TC-CR-01 s/d TC-CR-04) khusus untuk menguji fungsionalitas unduh CSV, kelengkapan data, dan kompatibilitas format Excel. |
+| **README** | `README.md` | Menambahkan sub-bab "Ekspor Data ke CSV" di bagian "Penggunaan" untuk memandu user cara menggunakan fitur baru ini. |
 
 ---
 
-## 2. Kasus Uji Baru
+## 2. Kasus uji baru
 
 | ID | Langkah / input | Hasil yang diharapkan |
 |---|---|---|
-| CR-01 | Pada halaman Riwayat Transaksi, ketik kata kunci `"cireng"` pada kolom pencarian | Tabel riwayat secara instan hanya menampilkan transaksi yang mengandung kata `"cireng"` pada kolom keterangan/deskripsi; baris transaksi lain disembunyikan. |
-| CR-02 | Pilih dropdown Filter Jenis Transaksi = `"Setor Tunai"` dan rentang waktu = `"Bulan Ini"` | Tabel hanya memuat baris transaksi bertipe `setor` yang terjadi pada bulan berjalan; mutasi transfer dan tarik tunai tidak ditampilkan. |
-| CR-03 | Lakukan filter transaksi, lalu klik tombol `"Ekspor CSV"` | Browser secara otomatis mengunduh berkas dengan nama `mutasi-transaksi-[tanggal].csv`. Saat dibuka di Excel, kolom tanggal, jenis, pengirim, penerima, nominal, dan keterangan tersusun rapi dengan pemisah kolom yang tepat. |
-| CR-04 | Masukkan kata kunci pencarian yang tidak ada di database, misal `"xyz123random"` | Tabel menampilkan pesan status informatif: *"Tidak ada transaksi yang cocok dengan pencarian atau filter Anda"*, tanpa error JavaScript. |
+| **TC-CR-01** | 1. Login sebagai Admin/Direktur.<br>2. Buka menu "Kelola Nasabah".<br>3. Pastikan tidak ada filter aktif (tampilkan semua).<br>4. Klik tombol "Ekspor CSV". | Browser otomatis mengunduh file `data_nasabah_[tanggal].csv`. File berisi header kolom dan seluruh data nasabah aktif. |
+| **TC-CR-02** | 1. Buka menu "Kelola Nasabah".<br>2. Aktifkan Filter: Kategori = "Pelajar", Kelas = "XI AKL 1".<br>3. Klik tombol "Ekspor CSV". | File CSV yang diunduh **hanya** berisi data nasabah dengan kategori Pelajar dan kelas XI AKL 1, bukan semua nasabah. |
+| **TC-CR-03** | 1. Buka file CSV yang diunduh menggunakan Microsoft Excel atau Google Sheets.<br>2. Periksa kolom "Nama" yang mengandung huruf khusus (misal: "Siti Aisyah", "Budi Santoso"). | File terbuka tanpa error. Huruf dan tanda baca terbaca dengan benar (tidak menjadi simbol aneh/`???`), menandakan encoding UTF-8 BOM berhasil. |
+| **TC-CR-04** | 1. Buka menu "Riwayat Transaksi".<br>2. Filter periode: 1 Oktober s/d 15 Oktober.<br>3. Klik tombol "Ekspor CSV Riwayat". | File CSV berisi riwayat transaksi hanya pada rentang tanggal tersebut, dengan kolom: Tanggal, Jenis, Dari, Ke, Jumlah, Keterangan. |
 
 ---
 
-## 3. Setelah Selesai
-- [x] Kasus uji lama tetap lulus (U01–U10 tetap berfungsi normal tanpa regresi)
-- [x] Kasus uji baru lulus (CR-01 hingga CR-04 terverifikasi)
-- [x] Spesifikasi diperbarui (`01-spesifikasi.md` telah disinkronkan)
-- [x] README diperbarui (`README.md` dan `README-template.md` telah memuat panduan fitur baru)
+## 3. Setelah selesai
+
+- [ ] Kasus uji lama tetap lulus (Fitur pencarian dan filter yang sudah ada tidak rusak/regresi).
+- [ ] Kasus uji baru lulus (TC-CR-01 s/d TC-CR-04 berhasil dieksekusi dan menghasilkan file CSV yang valid).
+- [ ] Spesifikasi diperbarui (File `01-spesifikasi-produk.md` sudah mencakup detail fitur CSV).
+- [ ] README diperbarui (Panduan penggunaan fitur CSV sudah ditambahkan di `README.md`).
+- [ ] Kode di-commit dan di-push ke repository GitHub dengan pesan commit yang jelas.
+
+---
+> **Catatan untuk Tim:** Pastikan fungsi `exportToCSV` menambahkan `\uFEFF` (Byte Order Mark) di awal string CSV agar Excel mengenali encoding UTF-8 dan tidak mengacak-acak huruf Indonesia.
