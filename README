@@ -56,25 +56,49 @@ Hasil yang diharapkan: semua test lulus.
 
 ## Fitur
 
--
+### 🔒 Keamanan & Autentikasi
+- **Multi-Role Access Control**: 5 peran berbeda (Direktur, Admin, Teller, CS, Nasabah) dengan hak akses menu yang terpisah dan terkontrol.
+- **Dual Portal Login**: URL terpisah untuk Portal Nasabah (`?page=nasabah`) dan Portal Admin/Staff (`?page=admin`) guna mencegah login silang.
+- **PIN 6 Digit & Blokir Otomatis**: Validasi PIN wajib untuk transaksi transfer dan tunai. Akun otomatis terblokir setelah 3x salah memasukkan PIN.
+- **Reset Password & PIN**: Admin dapat mereset password/PIN nasabah atau Teller ke default `123456` sekaligus membuka blokir akun secara instan.
+- **Optimistic Locking**: Mencegah konflik data (*race condition*) saat dua pengguna mengedit data yang sama secara bersamaan (berbasis field `__version`).
+
+### 👥 Manajemen Nasabah
+- **Registrasi Mandiri Nasabah**: Siswa dapat mendaftar sendiri via portal dengan status `pending` hingga disetujui oleh Admin/CS.
+- **Kategori Nasabah**: Pemisahan kategori menjadi "Pelajar" (dengan field khusus "Kelas", misal: XI AKL 1) dan "Umum".
+- **Filter & Pencarian Lanjutan**: Filter data berdasarkan Status, Kategori, Kelas, pencarian nama/no. rekening, serta pengurutan (*sort*) saldo (tertinggi/terendah) dan nama (A-Z).
+- **Pagination Otomatis**: Daftar nasabah dibagi menjadi 10 data per halaman untuk menjaga performa rendering aplikasi.
+- **Aktifkan/Nonaktifkan Nasabah**: Admin dapat menonaktifkan akun nasabah bermasalah tanpa harus menghapus data historis transaksinya.
+
+### 💰 Transaksi Keuangan
+- **Transfer Antar Nasabah (Atomic)**: Transfer dengan validasi PIN dan batas harian berbeda (Pelajar: Rp500.000 / Umum: Rp2.000.000).
+- **Setor & Tarik Tunai via Teller**: Teller wajib menginput PIN sebelum memproses transaksi tunai untuk menjamin keamanan.
+- **Anti-Duplikasi Transaksi**: Sistem mencegah *double submission* saat pengguna mengklik tombol proses lebih dari satu kali secara cepat.
+- **Auto-Rollback**: Jika proses update saldo gagal di tengah jalan, transaksi otomatis dibatalkan/dihapus untuk mencegah inkonsistensi data (saldo tidak hilang).
+- **Batas Transfer Harian Configurable**: Admin/Direktur dapat mengatur dan mengubah limit transfer harian untuk kategori Pelajar dan Umum melalui menu Pengaturan.
+
+### 📄 Laporan & Pencetakan
+- **Cetak Data Nasabah (Filtered)**: Mencetak daftar nasabah sesuai filter yang aktif, dilengkapi ringkasan saldo (total, rata-rata, tertinggi).
+- **Cetak Rekening Koran**: Mencetak mutasi transaksi per periode dengan kolom Debit, Kredit, dan saldo akhir.
+- **Cetak Riwayat Transaksi**: Mencetak laporan transaksi dengan filter periode dan nama nasabah, dilengkapi ringkasan total setor/tarik/transfer.
+- **Print Multi-Page Support**: CSS khusus cetak A4 yang mendukung tabel panjang dengan header berulang, font kecil (10px), dan *page-break* otomatis.
+- **Hapus Riwayat (Tanpa Ubah Saldo)**: Fitur khusus Direktur untuk menghapus riwayat transaksi pada periode tertentu tanpa memengaruhi saldo akhir nasabah.
+
+### 📢 Notifikasi & Komunikasi
+- **Notifikasi Individual**: Admin/CS dapat mengirim pesan personal/notifikasi langsung ke nasabah tertentu.
+- **Broadcast Pengumuman**: Kirim pengumuman massal ke target spesifik: Semua Nasabah, Umum Saja, atau Pelajar Saja.
+- **Badge Notifikasi Real-time**: Indikator jumlah pesan yang belum dibaca di header aplikasi (untuk Nasabah & Staff).
+
+### ⚡ Performa & UX
+- **Real-time Sync (Polling 5 detik)**: Data otomatis ter-update di latar belakang tanpa perlu me-refresh halaman secara manual.
+- **Cache Management**: Data di-cache selama 30 detik untuk mempercepat waktu muat (*loading*) aplikasi dan mengurangi beban server.
+- **Mobile-First UI (Nasabah)**: Tampilan antarmuka khusus mobile dengan *bottom navigation* yang ramah pengguna untuk nasabah.
+- **Dashboard Statistik Real-time**: Kartu statistik ringkas yang menampilkan Total Admin/Teller/CS/Nasabah, Total Saldo, dan Transaksi Hari Ini.
 
 ## Batasan yang Diketahui
 
 Apa yang belum bisa dilakukan atau masih kurang?
 - scan menggunakan Barcode
-
-## Struktur Folder
-
-| File / folder | Isi |
-|---|---|
-| `docs/` | Dokumen proses kerja (spesifikasi, rencana, log prompt, kasus uji, dan lainnya) |
-| `src/` | Kode website |
-| `tes/` | Unit test |
-| `bughunt-kasir/` | Hasil Bug Hunt |
-
-## Link Demo (opsional)
-
-Jika website di-hosting (misalnya GitHub Pages), tuliskan link-nya di sini.
 
 ## Sumber dan Lisensi
 
