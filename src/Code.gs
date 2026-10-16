@@ -579,6 +579,33 @@ function warmupCache() {
   return { status: true, message: 'Cache warmed up' };
 }
 
+// ==================== VALIDATION CONSTANTS (SINGLE SOURCE OF TRUTH) ====================
+const PHONE_REGEX = /^08\d{8,12}$/;   // "08" + 8..12 digit angka → total 10..14 karakter
+const PIN_REGEX   = /^\d{6}$/;         // tepat 6 digit angka
+
+/**
+ * Validasi nomor HP / No. Rekening BSS.
+ * @param {*} phone
+ * @returns {boolean}
+ */
+function isValidPhone(phone) {
+  // Strict type check: harus string, bukan number/null/undefined
+  if (typeof phone !== 'string') return false;
+  return PHONE_REGEX.test(phone.trim());
+}
+
+/**
+ * Validasi PIN BSS.
+ * @param {*} pin
+ * @returns {boolean}
+ */
+function isValidPin(pin) {
+  // Strict type check: harus string, bukan number/null/undefined
+  if (typeof pin !== 'string') return false;
+  return PIN_REGEX.test(pin.trim());
+}
+
+
 // ==================== ERROR HANDLING HELPER ====================
 function safeExecute_(fn, operationName) {
   try {
