@@ -74,7 +74,7 @@
 
 **Cara Wawancara:** Langsung (tatap muka) di lingkungan SMKN 2 Kerinci dan sekitarnya
 **Tanggal:** Oktober 2026 (Hari ke-3 dan ke-4 logbook tim)
-**Bukti Wawancara:** [Google Drive Folder](https://drive.google.com/drive/folders/1wm9TFBDKQd7MI4JvPiD5DpzFWFno uVkd?usp=sharing)
+**Bukti Wawancara:** [Google Drive Folder](https://drive.google.com/drive/folders/1wm9TFBDKQd7MI4JvPiD5DpzFWFnouVkd?usp=sharing)
 
 ### Tabel Wawancara
 
@@ -125,7 +125,7 @@
 ### C. Fitur Transaksi Keuangan
 | No | Fitur | Deskripsi |
 |----|-------|-----------|
-| 11 | **Transfer Antar Nasabah (Atomic)** | Transfer dengan validasi PIN, batas harian berbeda (Pelajar: Rp500.000 / Umum: Rp2.000.000) |
+| 11 | **Transfer Antar Nasabah (Atomic)** | Transfer dengan validasi PIN, batas harian berbeda (Pelajar: Rp20.000 / Umum: Rp500.000) |
 | 12 | **Setor & Tarik Tunai via Teller** | Teller wajib input PIN sebelum memproses transaksi tunai |
 | 13 | **Anti-Duplikasi Transaksi** | Sistem mencegah double submission saat user klik tombol 2x |
 | 14 | **Auto-Rollback** | Jika update saldo gagal, transaksi otomatis dihapus (mencegah data tidak konsisten) |
