@@ -26,6 +26,7 @@ Berikut adalah langkah yang dilakukan pengguna dari awal sampai akhir untuk alur
 
 1. Buka alamat berikut di browser: 
 LOGIN untuk staff   : steampreneur-basamo-staff.blogspot.com / https://script.google.com/macros/s/AKfycbxedUBWRmN7ares8g512yFmtRU-_20VSd0DpQBwprhBcHMmZBRHC22HcoDTlgNQ1PCFRg/exec?page=admin
+
 LOGIN untuk nasabah : steampreneur-basamo-nasabah.blogspot.com / https://script.google.com/macros/s/AKfycbxedUBWRmN7ares8g512yFmtRU-_20VSd0DpQBwprhBcHMmZBRHC22HcoDTlgNQ1PCFRg/exec?page=nasabah
 
 ### Akun atau data contoh
@@ -34,10 +35,11 @@ link. data base spreadsheets: https://docs.google.com/spreadsheets/d/1-N1rKBcoqM
 
 login untuk data awal, berikut data contoh :
 
-| Peran | Username | Password |
-|direktur|direktur|direktur123|
-|admin|admin01|123456|
-|nasabah|082177903994|123456|
+| Peran     | Username      | Password  |
+|-----------|---------------|-----------|
+| direktur  | direktur      | direktur123 |
+| admin     | admin01       | 123456    |
+| nasabah   | 082177903994  | 123456    |
 
 
 ## Tangkapan Layar Alur Inti
@@ -104,6 +106,7 @@ Berikut adalah beberapa hal yang belum bisa dilakukan, masih memiliki keterbatas
 ## Sumber dan Lisensi
 
 | Nama | Sumber (link) | Lisensi |
+|------|---------------|---------|
 | **Tailwind CSS** | [tailwindcss.com](https://tailwindcss.com) | MIT License |
 | **Plus Jakarta Sans** (Font) | [Google Fonts](https://fonts.google.com/specimen/Plus+Jakarta+Sans) | Open Font License (OFL) |
 | **Heroicons** (Ikon SVG) | [heroicons.com](https://heroicons.com) | MIT License |
@@ -111,6 +114,8 @@ Berikut adalah beberapa hal yang belum bisa dilakukan, masih memiliki keterbatas
 
 ## Tim
 
+| Nama | Jabatan |
+|------|---------|
 | MUTYA LAURA | Ketua Tim |
 | CANTIKA AMELIAN | Anggota |
 | ISRA JULIAN SARI | Anggota |
