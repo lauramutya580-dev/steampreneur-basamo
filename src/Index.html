@@ -807,8 +807,9 @@ const password = document.getElementById('reg-password')?.value;
 const pin = document.getElementById('reg-pin')?.value;
 if (!name || !phone || !password || !pin) { showToast('Mohon lengkapi semua data', 'error'); return; }
 if (category === 'pelajar' && !kelas) { showToast('Mohon isi kelas untuk pelajar', 'error'); return; }
+// ⚠️ WAJIB SINKRON dengan PHONE_REGEX & PIN_REGEX di Code.gs
 if (!/^08\d{8,12}$/.test(phone)) { showToast('Format nomor HP tidak valid', 'error'); return; }
-if (!/^\d{6}$/.test(pin)) { showToast('PIN harus 6 digit angka', 'error'); return; }
+if (!/^\d{6}$/.test(pin))         { showToast('PIN harus 6 digit angka', 'error'); return; }
 if (getUserByPhone(phone)) { showToast('Nomor HP sudah terdaftar', 'error'); return; }
 showLoading('btn-register');
 const result = await window.dataSdk.create({
@@ -1895,8 +1896,9 @@ const kelas = document.getElementById('reg-kelas')?.value.trim() || '';
 const password = document.getElementById('add-nasabah-password')?.value;
 const pin = document.getElementById('add-nasabah-pin')?.value;
 if (!name || !phone || !password || !pin) { showToast('Mohon lengkapi semua data', 'error'); return; }
+// ⚠️ WAJIB SINKRON dengan PHONE_REGEX & PIN_REGEX di Code.gs
 if (!/^08\d{8,12}$/.test(phone)) { showToast('Format nomor HP tidak valid', 'error'); return; }
-if (!/^\d{6}$/.test(pin)) { showToast('PIN harus 6 digit angka', 'error'); return; }
+if (!/^\d{6}$/.test(pin))         { showToast('PIN harus 6 digit angka', 'error'); return; }
 if (getUserByPhone(phone)) { showToast('Nomor HP sudah terdaftar', 'error'); return; }
 showLoading('btn-add-nasabah');
 const result = await window.dataSdk.create({
