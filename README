@@ -65,7 +65,7 @@ Minimal satu tangkapan layar untuk setiap langkah alur inti, termasuk hasil chan
 - **Aktifkan/Nonaktifkan Nasabah**: Admin dapat menonaktifkan akun nasabah bermasalah tanpa harus menghapus data historis transaksinya.
 
 ### 💰 Transaksi Keuangan
-- **Transfer Antar Nasabah (Atomic)**: Transfer dengan validasi PIN dan batas harian berbeda (Pelajar: Rp500.000 / Umum: Rp2.000.000).
+- **Transfer Antar Nasabah (Atomic)**: Transfer dengan validasi PIN dan batas harian berbeda (Pelajar: Rp20.000 / Umum: Rp500.000).
 - **Setor & Tarik Tunai via Teller**: Teller wajib menginput PIN sebelum memproses transaksi tunai untuk menjamin keamanan.
 - **Anti-Duplikasi Transaksi**: Sistem mencegah *double submission* saat pengguna mengklik tombol proses lebih dari satu kali secara cepat.
 - **Auto-Rollback**: Jika proses update saldo gagal di tengah jalan, transaksi otomatis dibatalkan/dihapus untuk mencegah inkonsistensi data (saldo tidak hilang).
