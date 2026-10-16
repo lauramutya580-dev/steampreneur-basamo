@@ -1,0 +1,3163 @@
+<!doctype html>
+<html lang="id" class="h-full">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BSS - Bank Syariah Sekolah</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body { box-sizing: border-box; }
+* { font-family: 'Plus Jakarta Sans', sans-serif; }
+.sidebar-item { transition: all 0.3s ease; }
+.sidebar-item:hover { transform: translateX(5px); }
+.card-hover { transition: all 0.3s ease; }
+.card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+.gradient-gold { background: linear-gradient(135deg, #D4AF37 0%, #F4E4BC 50%, #D4AF37 100%); }
+.gradient-dark { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
+.btn-loading { position: relative; pointer-events: none; opacity: 0.8; }
+.btn-loading::after {
+content: ''; position: absolute; width: 20px; height: 20px; top: 50%; left: 50%;
+margin-left: -10px; margin-top: -10px; border: 2px solid transparent;
+border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+.modal-animate { animation: fadeIn 0.3s ease; }
+.slide-in { animation: slideIn 0.5s ease; }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+.scrollbar-thin::-webkit-scrollbar { width: 6px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 3px; }
+/* ==================== PRINT CSS - MULTI PAGE SUPPORT ==================== */
+@media print {
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        background: white !important;
+        padding: 10mm !important;
+        margin: 0 !important;
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+        display: block !important;
+    }
+    .print-hide { display: none !important; }
+    @page {
+        margin: 10mm;
+        size: A4 portrait;
+    }
+    table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+        page-break-inside: auto !important;
+        display: table !important;
+    }
+    thead {
+        display: table-header-group !important;
+        page-break-inside: avoid !important;
+    }
+    tbody {
+        display: table-row-group !important;
+    }
+    tr {
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
+        display: table-row !important;
+    }
+    /* PERUBAHAN ADA DI SINI: Font dikecilkan dan padding dikurangi */
+    th, td {
+        border: 1px solid #e5e7eb !important;
+        padding: 4px !important; /* Dikurangi dari 8px agar lebih rapat */
+        font-size: 10px !important; /* Ukuran font diperkecil agar muat 1 baris */
+        page-break-inside: avoid !important;
+        white-space: nowrap !important; /* Mencegah teks turun ke baris baru jika memungkinkan */
+    }
+    .overflow-x-auto, .max-h-64, .overflow-y-auto, .overflow-auto {
+        overflow: visible !important;
+        max-height: none !important;
+        height: auto !important;
+    }
+    #modal-overlay {
+        position: static !important;
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    #modal-overlay > div {
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+    }
+    .bg-white, .bg-gray-50 {
+        background: white !important;
+    }
+    .text-gray-500, .text-gray-400 {
+        color: #666 !important;
+    }
+    .text-green-600 { color: #059669 !important; }
+    .text-red-600 { color: #dc2626 !important; }
+    .text-blue-600 { color: #2563eb !important; }
+    .text-amber-600 { color: #d97706 !important; }
+    tr:last-child {
+        page-break-after: avoid !important;
+    }
+    .sticky {
+        position: static !important;
+    }
+}
+/* ==================== END PRINT CSS ==================== */
+.batch-update { transition: none !important; }
+</style>
+</head>
+<body class="h-full bg-gray-50">
+<div id="app" class="h-full w-full flex items-center justify-center">
+<div class="text-center">
+<div class="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+<p class="text-gray-600 font-medium">Memuat sistem perbankan...</p>
+</div>
+</div>
+<script>
+// ==================== CONFIG & STATE (Optimized) ====================
+const defaultConfig = {
+app_title: 'Bank Syariah Sekolah',
+school_name: 'SMKN 2 KERINCI',
+primary_color: '#1a1a2e',
+secondary_color: '#D4AF37',
+accent_color: '#16213e',
+text_color: '#333333',
+bg_color: '#f8f9fa'
+};
+let config = { ...defaultConfig };
+let allData = [];
+let currentUser = null;
+let currentView = 'login';
+let currentSubView = 'dashboard';
+let _lastDataHash = '';
+let _pendingUpdates = [];
+let _updateTimer = null;
+
+// ==================== PERFORMANCE UTILITIES ====================
+const debounce = (func, wait) => {
+let timeout;
+return function executedFunction(...args) {
+const later = () => { clearTimeout(timeout); func(...args); };
+clearTimeout(timeout);
+timeout = setTimeout(later, wait);
+};
+};
+const throttle = (func, limit) => {
+let inThrottle;
+return function(...args) {
+if (!inThrottle) {
+func.apply(this, args);
+inThrottle = true;
+setTimeout(() => inThrottle = false, limit);
+}
+};
+};
+const generateId = () => Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+
+// ==================== DATA SDK ====================
+window.dataSdk = {
+_requestQueue: [],
+_processing: false,
+_processQueue: async function() {
+if (this._processing || this._requestQueue.length === 0) return;
+this._processing = true;
+while (this._requestQueue.length > 0) {
+const { resolve, reject, fn } = this._requestQueue.shift();
+try {
+const result = await fn();
+resolve(result);
+} catch (error) {
+reject(error);
+}
+await new Promise(r => setTimeout(r, 50));
+}
+this._processing = false;
+},
+_queueRequest: function(fn) {
+return new Promise((resolve, reject) => {
+this._requestQueue.push({ resolve, reject, fn });
+this._processQueue();
+});
+},
+init: async (handler) => {
+window._dataHandler = handler;
+return new Promise((resolve) => {
+const fetchData = () => {
+return new Promise((res) => {
+if (typeof google !== 'undefined' && google.script && google.script.run) {
+google.script.run.withSuccessHandler(data => {
+_lastDataHash = JSON.stringify(data);
+handler.onDataChanged(data);
+res({ isOk: true });
+}).withFailureHandler(err => {
+console.error('Init error:', err);
+res({ isOk: false, error: err.message });
+}).getAllData();
+} else {
+console.warn("Mode Preview: Menggunakan LocalStorage");
+const localData = JSON.parse(localStorage.getItem('bss_data') || '[]');
+_lastDataHash = JSON.stringify(localData);
+handler.onDataChanged(localData);
+res({ isOk: true });
+}
+});
+};
+let attempts = 0;
+const tryInit = async () => {
+const result = await fetchData();
+if (result.isOk || attempts >= 3) {
+resolve(result);
+} else {
+attempts++;
+setTimeout(tryInit, Math.pow(2, attempts) * 500);
+}
+};
+tryInit();
+});
+},
+create: async (data) => {
+return window.dataSdk._queueRequest(async () => {
+return new Promise((resolve) => {
+const doCreate = () => {
+if (typeof google !== 'undefined' && google.script && google.script.run) {
+google.script.run.withSuccessHandler(res => {
+if(res.status) {
+_lastDataHash = JSON.stringify(res.allData);
+window._dataHandler.onDataChanged(res.allData);
+}
+resolve({ isOk: res.status, error: res.error });
+}).withFailureHandler(err => {
+console.error('Create failed:', err);
+resolve({ isOk: false, error: err.message });
+}).handleCreate(data);
+} else {
+data.__backendId = generateId();
+const localData = JSON.parse(localStorage.getItem('bss_data') || '[]');
+localData.push(data);
+localStorage.setItem('bss_data', JSON.stringify(localData));
+_lastDataHash = JSON.stringify(localData);
+window._dataHandler.onDataChanged(localData);
+resolve({ isOk: true });
+}
+};
+doCreate();
+});
+});
+},
+createBatch: async (dataArray) => {
+if (!dataArray || dataArray.length === 0) return { isOk: true };
+return window.dataSdk._queueRequest(async () => {
+return new Promise((resolve) => {
+if (typeof google !== 'undefined' && google.script && google.script.run) {
+google.script.run.withSuccessHandler(res => {
+if(res.status) {
+_lastDataHash = JSON.stringify(res.allData);
+window._dataHandler.onDataChanged(res.allData);
+}
+resolve({ isOk: res.status, error: res.error });
+}).withFailureHandler(err => {
+console.error('CreateBatch failed:', err);
+resolve({ isOk: false, error: err.message });
+}).handleCreateBatch(dataArray);
+} else {
+const localData = JSON.parse(localStorage.getItem('bss_data') || '[]');
+dataArray.forEach(data => {
+data.__backendId = generateId();
+localData.push(data);
+});
+localStorage.setItem('bss_data', JSON.stringify(localData));
+_lastDataHash = JSON.stringify(localData);
+window._dataHandler.onDataChanged(localData);
+resolve({ isOk: true });
+}
+});
+});
+},
+update: async (data) => {
+return window.dataSdk._queueRequest(async () => {
+return new Promise((resolve) => {
+if (typeof google !== 'undefined' && google.script && google.script.run) {
+google.script.run.withSuccessHandler(res => {
+if(res.status) {
+_lastDataHash = JSON.stringify(res.allData);
+window._dataHandler.onDataChanged(res.allData);
+}
+resolve({ isOk: res.status, error: res.error });
+}).withFailureHandler(err => {
+console.error('Update failed:', err);
+resolve({ isOk: false, error: err.message });
+}).handleUpdate(data);
+} else {
+const localData = JSON.parse(localStorage.getItem('bss_data') || '[]');
+const index = localData.findIndex(d => d.__backendId === data.__backendId);
+if (index !== -1) {
+localData[index] = data;
+localStorage.setItem('bss_data', JSON.stringify(localData));
+_lastDataHash = JSON.stringify(localData);
+window._dataHandler.onDataChanged(localData);
+resolve({ isOk: true });
+} else {
+resolve({ isOk: false, error: 'Not found' });
+}
+}
+});
+});
+},
+delete: async (data) => {
+return window.dataSdk._queueRequest(async () => {
+return new Promise((resolve) => {
+if (typeof google !== 'undefined' && google.script && google.script.run) {
+google.script.run.withSuccessHandler(res => {
+if(res.status) {
+_lastDataHash = JSON.stringify(res.allData);
+window._dataHandler.onDataChanged(res.allData);
+}
+resolve({ isOk: res.status, error: res.error });
+}).withFailureHandler(err => {
+console.error('Delete failed:', err);
+resolve({ isOk: false, error: err.message });
+}).handleDelete(data);
+} else {
+let localData = JSON.parse(localStorage.getItem('bss_data') || '[]');
+localData = localData.filter(d => d.__backendId !== data.__backendId);
+localStorage.setItem('bss_data', JSON.stringify(localData));
+_lastDataHash = JSON.stringify(localData);
+window._dataHandler.onDataChanged(localData);
+resolve({ isOk: true });
+}
+});
+});
+},
+atomicTransfer: async (transferData) => {
+return window.dataSdk._queueRequest(async () => {
+return new Promise((resolve) => {
+if (typeof google !== 'undefined' && google.script && google.script.run) {
+google.script.run.withSuccessHandler(res => {
+if(res.status) {
+_lastDataHash = JSON.stringify(res.allData);
+window._dataHandler.onDataChanged(res.allData);
+}
+resolve({ isOk: res.status, error: res.error, allData: res.allData });
+}).withFailureHandler(err => {
+console.error('Atomic transfer failed:', err);
+resolve({ isOk: false, error: err.message });
+}).handleAtomicTransfer(transferData);
+} else {
+console.warn("Atomic transfer: Mode preview (tanpa lock server)");
+const { fromAccount, toAccount, amount, description, senderName, targetName, timestamp } = transferData;
+const localData = JSON.parse(localStorage.getItem('bss_data') || '[]');
+const sender = localData.find(u => u.phone === fromAccount && u.role === 'nasabah');
+const target = localData.find(u => u.phone === toAccount && u.role === 'nasabah');
+if (!sender || !target) {
+resolve({ isOk: false, error: 'Salah satu rekening tidak ditemukan (mode preview)' });
+return;
+}
+if (sender.balance < amount) {
+resolve({ isOk: false, error: 'Saldo tidak mencukupi (mode preview)' });
+return;
+}
+sender.balance -= amount;
+target.balance += amount;
+localData.push({
+type: 'transaction', __backendId: generateId(), __version: 1,
+__timestamp: timestamp || new Date().toISOString(),
+transaction_type: 'transfer', amount, from_account: fromAccount, to_account: toAccount,
+from_name: senderName || sender.name, to_name: targetName || target.name,
+description: description || 'Transfer', created_at: timestamp || new Date().toISOString()
+});
+localStorage.setItem('bss_data', JSON.stringify(localData));
+_lastDataHash = JSON.stringify(localData);
+window._dataHandler.onDataChanged(localData);
+resolve({ isOk: true });
+}
+});
+});
+}
+};
+
+// ==================== UTILITY FUNCTIONS ====================
+const formatRupiah = (num) => {
+if (!num && num !== 0) return 'Rp 0';
+return 'Rp ' + Number(num).toLocaleString('id-ID');
+};
+const parseRupiah = (str) => {
+if (!str) return 0;
+return parseInt(str.toString().replace(/[^\d]/g, '')) || 0;
+};
+const formatDate = (dateStr) => {
+if (!dateStr) return '-';
+const d = new Date(dateStr);
+return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+};
+const formatDateTime = (dateStr) => {
+if (!dateStr) return '-';
+const d = new Date(dateStr);
+return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+};
+const showLoading = (btnId) => {
+const btn = document.getElementById(btnId);
+if (btn && !btn.classList.contains('btn-loading')) {
+btn.classList.add('btn-loading');
+btn.disabled = true;
+btn.dataset.originalText = btn.innerHTML;
+btn.innerHTML = '<span class="opacity-0">' + btn.innerHTML + '</span>';
+}
+};
+const hideLoading = (btnId) => {
+const btn = document.getElementById(btnId);
+if (btn) {
+btn.classList.remove('btn-loading');
+btn.disabled = false;
+if (btn.dataset.originalText) btn.innerHTML = btn.dataset.originalText;
+}
+};
+
+// ==================== DATA HELPERS ====================
+let _usersCache = null;
+let _transactionsCache = null;
+const invalidateDataCache = () => {
+_usersCache = null;
+_transactionsCache = null;
+};
+const getUsers = () => {
+if (!_usersCache) {
+_usersCache = allData.filter(d => d.type === 'user');
+}
+return _usersCache;
+};
+const getTransactions = () => {
+if (!_transactionsCache) {
+_transactionsCache = allData.filter(d => d.type === 'transaction');
+}
+return _transactionsCache;
+};
+const getSettings = () => allData.find(d => d.type === 'settings');
+const getUsersByRole = (role) => getUsers().filter(u => u.role === role);
+const getUserByPhone = (phone) => getUsers().find(u => u.phone === phone);
+const getUserByUsername = (username) => getUsers().find(u => u.username === username);
+const getPendingNasabah = () => getUsers().filter(u => u.role === 'nasabah' && u.status === 'pending');
+const getTotalBalance = () => {
+return getUsers()
+.filter(u => u.role === 'nasabah' && u.status === 'active')
+.reduce((sum, u) => sum + (u.balance || 0), 0);
+};
+
+// ==================== MODAL SYSTEM ====================
+const showModal = (content, size = 'md') => {
+const existing = document.getElementById('modal-overlay');
+if (existing) existing.remove();
+const sizeClasses = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg', xl: 'max-w-xl', '2xl': 'max-w-2xl', '4xl': 'max-w-4xl' };
+const modal = document.createElement('div');
+modal.id = 'modal-overlay';
+modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-start md:items-center justify-center z-50 p-4 pt-10';
+modal.innerHTML = `<div class="bg-white rounded-2xl shadow-2xl ${sizeClasses[size]} w-full max-h-[90%] overflow-auto modal-animate">${content}</div>`;
+modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); }, { once: true });
+document.body.appendChild(modal);
+setTimeout(() => {
+const firstInput = modal.querySelector('input, button, select, textarea');
+if (firstInput) firstInput.focus();
+}, 100);
+};
+const closeModal = () => {
+const modal = document.getElementById('modal-overlay');
+if (modal) {
+modal.style.animation = 'fadeIn 0.2s reverse';
+setTimeout(() => modal.remove(), 200);
+}
+};
+const showSuccessModal = (title, details) => {
+const content = `
+<div class="p-8 text-center">
+<div class="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
+<svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+</div>
+<h3 class="text-2xl font-bold text-gray-800 mb-4">${title}</h3>
+<div class="bg-gray-50 rounded-xl p-4 text-left mb-6">${details}</div>
+<button onclick="closeModal()" class="px-8 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all">Tutup</button>
+</div>`;
+showModal(content);
+};
+const showBlockedModal = () => {
+const content = `
+<div class="p-8 text-center">
+<div class="w-20 h-20 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
+<svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+</div>
+<h3 class="text-2xl font-bold text-red-600 mb-4">Akun Terblokir</h3>
+<p class="text-gray-600 mb-6">Akun Anda telah diblokir karena 3 kali salah memasukkan PIN. Silakan hubungi Customer Service atau Admin untuk membuka blokir akun Anda.</p>
+<button onclick="closeModal(); logout();" class="px-8 py-3 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition-all">Keluar</button>
+</div>`;
+showModal(content);
+};
+const showPinErrorModal = (attemptsLeft) => {
+const content = `
+<div class="p-6 text-center">
+<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
+<svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+</div>
+<h3 class="text-xl font-bold text-gray-800 mb-2">PIN Salah!</h3>
+<p class="text-gray-600 mb-4">${attemptsLeft} kesempatan tersisa</p>
+<button onclick="closeModal()" class="px-6 py-2 bg-amber-500 text-white rounded-lg font-semibold hover:bg-amber-600 transition-all">Coba Lagi</button>
+</div>`;
+showModal(content, 'sm');
+};
+const showToast = (message, type = 'success') => {
+document.querySelectorAll('.toast-notification').forEach(t => t.remove());
+const toast = document.createElement('div');
+toast.className = `toast-notification fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg slide-in print-hide ${
+type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-amber-500'
+} text-white font-medium`;
+toast.innerHTML = message;
+document.body.appendChild(toast);
+setTimeout(() => {
+toast.style.opacity = '0';
+toast.style.transform = 'translateY(-10px)';
+setTimeout(() => toast.remove(), 300);
+}, 3000);
+};
+
+// ==================== BSS LOGO SVG ====================
+const getBSSLogo = (size = 60) => `
+<svg width="${size}" height="${size}" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#D4AF37"/><stop offset="50%" style="stop-color:#F4E4BC"/><stop offset="100%" style="stop-color:#D4AF37"/></linearGradient></defs>
+<circle cx="50" cy="50" r="48" fill="#1a1a2e" stroke="url(#goldGrad)" stroke-width="3"/>
+<text x="50" y="42" text-anchor="middle" fill="url(#goldGrad)" font-size="24" font-weight="800" font-family="Plus Jakarta Sans">BSS</text>
+<text x="50" y="58" text-anchor="middle" fill="#D4AF37" font-size="8" font-weight="600" font-family="Plus Jakarta Sans">BANK SYARIAH</text>
+<text x="50" y="68" text-anchor="middle" fill="#D4AF37" font-size="7" font-weight="500" font-family="Plus Jakarta Sans">SEKOLAH</text>
+<path d="M25 75 L50 85 L75 75" stroke="#D4AF37" stroke-width="2" fill="none"/>
+</svg>`;
+
+// ==================== RENDER LOGIN ====================
+const renderLogin = () => {
+    const app = document.getElementById('app');
+    app.className = "h-full w-full";
+    const mode = window.loginMode || 'all';
+    
+    // 🔥 Konfigurasi UI berdasarkan Mode URL
+    let titleText = "Selamat Datang";
+    let subtitleText = "Masuk ke akun Anda";
+    let showRegisterLink = true;
+    let placeholderText = "Masukkan username";
+    let labelText = "Username / No. HP";
+    let portalText = "Sistem Perbankan Syariah Digital";
+    
+    if (mode === 'nasabah') {
+        titleText = "Login Nasabah";
+        subtitleText = "Masuk ke akun rekening Anda";
+        showRegisterLink = true;
+        placeholderText = "Masukkan No. HP / No. Rekening";
+        labelText = "No. HP / No. Rekening";
+        portalText = "Portal Nasabah";
+    } else if (mode === 'admin' || mode === 'staff') {
+        titleText = "Login Admin & Staff";
+        subtitleText = "Portal Petugas Bank Syariah Sekolah";
+        showRegisterLink = false; // Sembunyikan tombol daftar
+        placeholderText = "Masukkan Username";
+        labelText = "Username";
+        portalText = "Portal Admin & Staff";
+    }
+
+    app.innerHTML = `
+    <div class="min-h-full w-full gradient-dark flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden max-w-4xl w-full flex flex-col md:flex-row">
+            <div class="gradient-dark p-8 md:p-12 flex flex-col items-center justify-center md:w-1/2">
+                ${getBSSLogo(120)}
+                <h1 class="text-2xl md:text-3xl font-bold text-amber-400 mt-6 text-center">${config.app_title}</h1>
+                <p class="text-amber-200 mt-2 text-center">${config.school_name}</p>
+                <div class="mt-8 text-center">
+                    <p class="text-gray-400 text-sm">${portalText}</p>
+                    <p class="text-gray-500 text-xs mt-2">Amanah • Terpercaya • Berkah</p>
+                </div>
+            </div>
+            <div class="p-8 md:p-12 md:w-1/2">
+                <div id="login-form-container">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">${titleText}</h2>
+                    <p class="text-gray-500 mb-8">${subtitleText}</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">${labelText}</label>
+                            <input type="text" id="login-username" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" placeholder="${placeholderText}" autocomplete="username">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <div class="relative">
+                                <input type="password" id="login-password" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" placeholder="Masukkan password" autocomplete="current-password">
+                                <button type="button" onclick="togglePassword('login-password', 'toggle-pwd-icon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600" aria-label="Toggle password visibility">
+                                    <svg id="toggle-pwd-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <button id="btn-login" onclick="handleLogin()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg">Masuk</button>
+                    </div>
+                    ${showRegisterLink ? `
+                    <div class="mt-6 text-center">
+                        <p class="text-gray-500 text-sm">Belum punya akun?</p>
+                        <button onclick="showRegisterForm()" class="text-amber-600 font-semibold hover:text-amber-700 mt-1">Daftar sebagai Nasabah</button>
+                    </div>` : ''}
+                </div>
+            </div>
+        </div>
+    </div>`;
+    setTimeout(() => {
+        const inputs = document.querySelectorAll('#login-username, #login-password');
+        inputs.forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+        });
+    }, 100);
+};
+const togglePassword = (inputId, iconId) => {
+const input = document.getElementById(inputId);
+const icon = document.getElementById(iconId);
+if (!input || !icon) return;
+if (input.type === 'password') {
+input.type = 'text';
+icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>`;
+} else {
+input.type = 'password';
+icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>`;
+}
+};
+const showRegisterForm = () => {
+const container = document.getElementById('login-form-container');
+if (!container) return;
+container.innerHTML = `
+<h2 class="text-2xl font-bold text-gray-800 mb-2">Daftar Nasabah</h2>
+<p class="text-gray-500 mb-6">Buat akun baru Anda</p>
+<div class="space-y-4">
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+<input type="text" id="reg-name" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent" placeholder="Masukkan nama lengkap" autocomplete="name"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">No. HP/WA (Username & No. Rekening)</label>
+<input type="tel" id="reg-phone" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent" placeholder="08xxxxxxxxxx" autocomplete="tel"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+<select id="reg-category" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent" onchange="toggleRegKelasField()"><option value="pelajar">Pelajar</option><option value="umum">Umum</option></select></div>
+<div id="reg-kelas-field"><label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+<input type="text" id="reg-kelas" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent" placeholder="Contoh: X RPL 1" autocomplete="off"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+<input type="password" id="reg-password" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent" placeholder="Buat password" autocomplete="new-password"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">PIN (6 digit angka)</label>
+<input type="password" id="reg-pin" maxlength="6" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent" placeholder="Buat PIN 6 digit"></div>
+<button id="btn-register" onclick="handleRegister()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg">Daftar</button>
+</div>
+<div class="mt-6 text-center"><button onclick="renderLogin()" class="text-amber-600 font-semibold hover:text-amber-700">← Kembali ke Login</button></div>`;
+setTimeout(() => {
+document.querySelectorAll('#reg-name, #reg-phone, #reg-password, #reg-pin').forEach(input => {
+input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleRegister(); });
+});
+}, 100);
+};
+const toggleRegKelasField = () => {
+const category = document.getElementById('reg-category')?.value;
+const kelasField = document.getElementById('reg-kelas-field');
+if (kelasField) {
+kelasField.style.display = category === 'pelajar' ? 'block' : 'none';
+if (category !== 'pelajar') {
+const kelasInput = document.getElementById('reg-kelas');
+if (kelasInput) kelasInput.value = '';
+}
+}
+};
+const checkDirectorLogin = async (username, password) => {
+  return new Promise((resolve) => {
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(res => {
+          if (res.status) {
+            _lastDataHash = JSON.stringify(res.allData);
+            if (window._dataHandler) {
+              window._dataHandler.onDataChanged(res.allData);
+            }
+            resolve({ isOk: true, director: res.director });
+          } else {
+            resolve({ isOk: false, error: res.error });
+          }
+        })
+        .withFailureHandler(err => {
+          resolve({ isOk: false, error: err.message });
+        })
+        .handleDirectorLogin(username, password);
+    } else {
+      // Mode preview lokal tanpa backend
+      if (username === 'direktur' && password === 'direktur150398') {
+        const localData = JSON.parse(localStorage.getItem('bss_data') || '[]');
+        let director = localData.find(u => u.username === 'direktur' && u.role === 'direktur');
+
+        if (!director) {
+          director = {
+            __backendId: generateId(),
+            type: 'user',
+            username: 'direktur',
+            password: 'direktur123',
+            name: 'Direktur BSS',
+            phone: '-',
+            role: 'direktur',
+            status: 'active',
+            created_at: new Date().toISOString()
+          };
+
+          localData.push(director);
+          localStorage.setItem('bss_data', JSON.stringify(localData));
+          _lastDataHash = JSON.stringify(localData);
+
+          if (window._dataHandler) {
+            window._dataHandler.onDataChanged(localData);
+          }
+        }
+
+        resolve({ isOk: true, director: director });
+      } else {
+        resolve({ isOk: false, error: 'Invalid director credentials' });
+      }
+    }
+  });
+};
+
+// ==================== AUTH HANDLERS ====================
+const handleLogin = async () => {
+    const username = document.getElementById('login-username')?.value.trim();
+    const password = document.getElementById('login-password')?.value;
+    const mode = window.loginMode || 'all'; // Ambil mode dari parameter URL (?page=nasabah / ?page=admin)
+
+    if (!username || !password) {
+        showToast('Mohon isi username dan password', 'error');
+        return;
+    }
+
+    showLoading('btn-login');
+
+    // Cek direktur lewat backend, password tidak lagi tertulis di frontend
+    const directorCheck = await checkDirectorLogin(username, password);
+    if (directorCheck.isOk && directorCheck.director) {
+        // 🔥 BLOKIR DIREKTUR JIKA MEMAKSA LOGIN DI URL NASABAH
+        if (mode === 'nasabah') {
+            hideLoading('btn-login');
+            showToast('Akses ditolak. Portal ini khusus untuk Nasabah.', 'error');
+            return;
+        }
+        currentUser = directorCheck.director;
+        currentView = 'dashboard';
+        currentSubView = 'dashboard';
+        hideLoading('btn-login');
+        renderDashboard();
+        return;
+    }
+
+    const user = getUsers().find(u =>
+        (u.username === username || u.phone === username) && u.password === password
+    );
+    hideLoading('btn-login');
+
+    if (!user) {
+        showToast('Username atau password salah', 'error');
+        return;
+    }
+
+    // 🔥 VALIDASI ROLE BERDASARKAN MODE URL (PENTING!)
+    if (mode === 'nasabah' && user.role !== 'nasabah') {
+        showToast('Akses ditolak. Akun Staff/Admin tidak bisa login di Portal Nasabah.', 'error');
+        return;
+    }
+    
+    if ((mode === 'admin' || mode === 'staff') && user.role === 'nasabah') {
+        showToast('Akses ditolak. Akun Nasabah tidak bisa login di Portal Admin/Staff.', 'error');
+        return;
+    }
+
+    if (user.blocked) {
+        showBlockedModal();
+        return;
+    }
+
+    if (user.status === 'pending') {
+        showToast('Akun Anda belum diaktifkan. Mohon tunggu konfirmasi.', 'warning');
+        return;
+    }
+
+    if (user.status === 'inactive') {
+        showToast('Akun Anda telah dinonaktifkan. Hubungi admin.', 'error');
+        return;
+    }
+
+    currentUser = user;
+    currentView = 'dashboard';
+    currentSubView = 'dashboard';
+    renderDashboard();
+};
+const handleRegister = async () => {
+const name = document.getElementById('reg-name')?.value.trim();
+const phone = document.getElementById('reg-phone')?.value.trim();
+const category = document.getElementById('reg-category')?.value;
+const kelas = document.getElementById('reg-kelas')?.value.trim() || '';
+const password = document.getElementById('reg-password')?.value;
+const pin = document.getElementById('reg-pin')?.value;
+if (!name || !phone || !password || !pin) { showToast('Mohon lengkapi semua data', 'error'); return; }
+if (category === 'pelajar' && !kelas) { showToast('Mohon isi kelas untuk pelajar', 'error'); return; }
+if (!/^08\d{8,12}$/.test(phone)) { showToast('Format nomor HP tidak valid', 'error'); return; }
+if (!/^\d{6}$/.test(pin)) { showToast('PIN harus 6 digit angka', 'error'); return; }
+if (getUserByPhone(phone)) { showToast('Nomor HP sudah terdaftar', 'error'); return; }
+showLoading('btn-register');
+const result = await window.dataSdk.create({
+type: 'user', username: phone, password: password, pin: pin, name: name, phone: phone,
+role: 'nasabah', category: category, kelas: category === 'pelajar' ? kelas : '',
+balance: 0, status: 'pending', pin_attempts: 0, blocked: false, created_at: new Date().toISOString()
+});
+hideLoading('btn-register');
+if (result.isOk) {
+showSuccessModal('Pendaftaran Berhasil!', `
+<div class="space-y-2">
+<p><span class="text-gray-500">Nama:</span> <strong>${name}</strong></p>
+<p><span class="text-gray-500">No. Rekening:</span> <strong>${phone}</strong></p>
+<p><span class="text-gray-500">Kategori:</span> <strong>${category === 'pelajar' ? 'Pelajar' : 'Umum'}</strong></p>
+${kelas ? `<p><span class="text-gray-500">Kelas:</span> <strong>${kelas}</strong></p>` : ''}
+<p class="text-amber-600 mt-4 text-sm">Akun Anda akan aktif setelah dikonfirmasi oleh Admin/CS.</p>
+</div>`);
+setTimeout(() => { closeModal(); renderLogin(); }, 3000);
+} else {
+showToast(result.error || 'Gagal mendaftar. Coba lagi.', 'error');
+}
+};
+const logout = () => {
+currentUser = null;
+currentView = 'login';
+currentSubView = 'dashboard';
+invalidateDataCache();
+renderLogin();
+};
+
+// ==================== TELLER PIN BLOCKING ====================
+const handleTellerPinError = async (tellerId, currentAttempts) => {
+const newAttempts = (currentAttempts || 0) + 1;
+const teller = allData.find(d => d.__backendId === tellerId);
+if (!teller) return;
+const updatedTeller = {
+...teller,
+pin_attempts: newAttempts,
+blocked: newAttempts >= 3
+};
+await window.dataSdk.update(updatedTeller);
+if (currentUser?.__backendId === tellerId) {
+currentUser = updatedTeller;
+}
+return { attempts: newAttempts, blocked: newAttempts >= 3 };
+};
+const resetTellerPinAttempts = async (tellerId) => {
+const teller = allData.find(d => d.__backendId === tellerId);
+if (!teller || !teller.pin_attempts) return;
+if (teller.pin_attempts > 0) {
+await window.dataSdk.update({
+...teller,
+pin_attempts: 0
+});
+}
+};
+
+// ==================== MOBILE MENU ====================
+const showMobileMenu = () => {
+const content = `
+<div class="p-6">
+<div class="flex items-center gap-3 mb-6 pb-4 border-b">
+<div class="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+${currentUser?.name?.charAt(0) || 'U'}
+</div>
+<div>
+<p class="font-bold text-gray-800">${currentUser?.name || 'User'}</p>
+<p class="text-gray-500 text-sm">${currentUser?.phone || '-'}</p>
+<p class="text-amber-600 text-xs font-medium capitalize">${currentUser?.role || 'Nasabah'}</p>
+</div>
+</div>
+<div class="space-y-2 mb-6">
+<button onclick="navigateTo('dashboard'); closeModal();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all text-left">
+<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+<span class="font-medium text-gray-700">Beranda</span>
+</button>
+<button onclick="navigateTo('transfer'); closeModal();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all text-left">
+<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+<span class="font-medium text-gray-700">Transfer</span>
+</button>
+<button onclick="navigateTo('history'); closeModal();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all text-left">
+<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+<span class="font-medium text-gray-700">Riwayat Transaksi</span>
+</button>
+<button onclick="navigateTo('password'); closeModal();" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-all text-left">
+<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+<span class="font-medium text-gray-700">Ubah Password & PIN</span>
+</button>
+</div>
+<button onclick="logout(); closeModal();" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold transition-all">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+<span>Keluar</span>
+</button>
+</div>`;
+showModal(content, 'sm');
+};
+
+// ==================== SIDEBAR & NAVIGATION ====================
+const getMenuItems = () => {
+const role = currentUser?.role;
+const baseItems = [{ id: 'dashboard', icon: 'home', label: 'Dashboard' }];
+if (role === 'direktur') {
+return [...baseItems,
+{ id: 'admin', icon: 'user-shield', label: 'Kelola Admin' },
+{ id: 'teller', icon: 'user-cash', label: 'Kelola Teller' },
+{ id: 'cs', icon: 'headset', label: 'Kelola CS' },
+{ id: 'nasabah', icon: 'users', label: 'Kelola Nasabah' },
+{ id: 'transaksi', icon: 'exchange', label: 'Transaksi' },
+{ id: 'history', icon: 'history', label: 'Riwayat Transaksi' },
+{ id: 'settings', icon: 'cog', label: 'Pengaturan' },
+{ id: 'password', icon: 'key', label: 'Ubah Password' }];
+} else if (role === 'admin') {
+return [...baseItems,
+{ id: 'teller', icon: 'user-cash', label: 'Kelola Teller' },
+{ id: 'cs', icon: 'headset', label: 'Kelola CS' },
+{ id: 'nasabah', icon: 'users', label: 'Kelola Nasabah' },
+{ id: 'transaksi', icon: 'exchange', label: 'Transaksi' },
+{ id: 'history', icon: 'history', label: 'Riwayat Transaksi' },
+{ id: 'settings', icon: 'cog', label: 'Pengaturan' },
+{ id: 'password', icon: 'key', label: 'Ubah Password' }];
+} else if (role === 'teller') {
+return [...baseItems,
+{ id: 'transaksi', icon: 'exchange', label: 'Transaksi' },
+{ id: 'history', icon: 'history', label: 'Riwayat Transaksi' },
+{ id: 'password', icon: 'key', label: 'Ubah Password' }];
+} else if (role === 'cs') {
+return [...baseItems,
+{ id: 'nasabah', icon: 'users', label: 'Kelola Nasabah' },
+{ id: 'history', icon: 'history', label: 'Riwayat Transaksi' },
+{ id: 'password', icon: 'key', label: 'Ubah Password' }];
+} else if (role === 'nasabah') {
+return [...baseItems,
+{ id: 'transfer', icon: 'paper-plane', label: 'Transfer' },
+{ id: 'history', icon: 'history', label: 'Riwayat Transaksi' },
+{ id: 'password', icon: 'key', label: 'Ubah Password/PIN' }];
+}
+return baseItems;
+};
+const getIcon = (name) => {
+const icons = {
+'home': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
+'user-shield': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>',
+'user-cash': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>',
+'headset': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>',
+'users': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>',
+'exchange': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>',
+'history': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+'cog': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>',
+'key': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>',
+'paper-plane': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>',
+'logout': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>',
+'bell': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>'
+};
+return `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">${icons[name] || icons['home']}</svg>`;
+};
+
+// ==================== RENDER DASHBOARD ====================
+const renderDashboard = () => {
+const app = document.getElementById('app');
+const menuItems = getMenuItems();
+const pendingCount = getPendingNasabah().length;
+const isNasabah = currentUser?.role === 'nasabah';
+const unreadCount = allData.filter(d => d.type === 'notification' && d.to_account === currentUser?.phone && !d.read).length;
+if (isNasabah) {
+app.innerHTML = `
+<div class="h-full w-full flex flex-col bg-gray-50 print-hide">
+<header class="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-3 shadow-lg">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+${getBSSLogo(40)}
+<div><h1 class="font-bold text-lg">BSS Mobile</h1><p class="text-xs text-amber-100">${config.school_name}</p></div>
+</div>
+<div class="flex items-center gap-2">
+<button onclick="showNasabahNotifications()" class="relative p-2 hover:bg-white/20 rounded-lg transition-all" aria-label="Notifikasi">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+<span id="notif-badge" class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full items-center justify-center ${unreadCount > 0 ? 'flex' : 'hidden'}">${unreadCount}</span>
+</button>
+<button onclick="showMobileMenu()" class="p-2 hover:bg-white/20 rounded-lg transition-all" aria-label="Menu">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+</button>
+</div>
+</div>
+</header>
+<nav class="bg-white border-b shadow-sm overflow-x-auto" role="navigation">
+<div class="flex">
+<button onclick="navigateTo('dashboard')" class="flex-1 min-w-max px-4 py-3 text-center font-medium transition-all ${currentSubView === 'dashboard' ? 'text-amber-600 border-b-2 border-amber-600 bg-amber-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}" aria-current="${currentSubView === 'dashboard' ? 'page' : 'false'}">
+<div class="flex flex-col items-center gap-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span class="text-xs">Beranda</span></div>
+</button>
+<button onclick="navigateTo('transfer')" class="flex-1 min-w-max px-4 py-3 text-center font-medium transition-all ${currentSubView === 'transfer' ? 'text-amber-600 border-b-2 border-amber-600 bg-amber-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}">
+<div class="flex flex-col items-center gap-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg><span class="text-xs">Transfer</span></div>
+</button>
+<button onclick="navigateTo('history')" class="flex-1 min-w-max px-4 py-3 text-center font-medium transition-all ${currentSubView === 'history' ? 'text-amber-600 border-b-2 border-amber-600 bg-amber-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}">
+<div class="flex flex-col items-center gap-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-xs">Riwayat</span></div>
+</button>
+<button onclick="navigateTo('password')" class="flex-1 min-w-max px-4 py-3 text-center font-medium transition-all ${currentSubView === 'password' ? 'text-amber-600 border-b-2 border-amber-600 bg-amber-50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}">
+<div class="flex flex-col items-center gap-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg><span class="text-xs">Keamanan</span></div>
+</button>
+</div>
+</nav>
+<main id="main-content" class="flex-1 overflow-auto p-4" role="main"></main>
+</div>`;
+} else {
+app.innerHTML = `
+<div class="h-full w-full flex">
+<aside class="w-64 gradient-dark flex flex-col h-full print-hide" role="navigation" aria-label="Sidebar">
+<div class="p-6 border-b border-gray-700">
+<div class="flex items-center gap-3">
+${getBSSLogo(50)}
+<div><h1 class="text-amber-400 font-bold">BSS</h1><p class="text-gray-400 text-xs">${config.school_name}</p></div>
+</div>
+</div>
+<nav class="flex-1 p-4 overflow-y-auto scrollbar-thin">
+${menuItems.map(item => `
+<button onclick="navigateTo('${item.id}')" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl mb-2 ${currentSubView === item.id ? 'bg-amber-500 text-white' : 'text-gray-300 hover:bg-gray-700'}" aria-current="${currentSubView === item.id ? 'page' : 'false'}">
+${getIcon(item.icon)}<span class="font-medium">${item.label}</span>
+</button>`).join('')}
+</nav>
+<div class="p-4 border-t border-gray-700">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold">${currentUser?.name?.charAt(0) || 'U'}</div>
+<div class="flex-1 min-w-0">
+<p class="text-white font-medium truncate">${currentUser?.name || 'User'}</p>
+<p class="text-gray-400 text-xs capitalize">${currentUser?.role || 'Role'}</p>
+</div>
+</div>
+<button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all">
+${getIcon('logout')}<span>Keluar</span>
+</button>
+</div>
+</aside>
+<div class="flex-1 h-full overflow-hidden flex flex-col bg-gray-50 print-hide">
+<header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between print-hide">
+<h2 class="text-xl font-bold text-gray-800">${menuItems.find(m => m.id === currentSubView)?.label || 'Dashboard'}</h2>
+<div class="flex items-center gap-4">
+${['direktur', 'admin', 'cs'].includes(currentUser?.role) ? `
+<button onclick="showNotifications()" class="relative p-2 text-gray-400 hover:text-gray-600" aria-label="Notifikasi">
+${getIcon('bell')}
+<span id="staff-notif-badge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full items-center justify-center ${pendingCount > 0 ? 'flex' : 'hidden'}">${pendingCount}</span>
+</button>` : ''}
+<span class="text-gray-500 text-sm">${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+</div>
+</header>
+<main id="main-content" class="flex-1 overflow-auto p-6" role="main"></main>
+</div>
+</div>`;
+}
+renderContent();
+};
+const navigateTo = (view) => {
+currentSubView = view;
+renderDashboard();
+};
+const renderContent = () => {
+const content = document.getElementById('main-content');
+if (!content) return;
+switch(currentSubView) {
+case 'dashboard': renderDashboardContent(content); break;
+case 'admin': renderUserManagement(content, 'admin'); break;
+case 'teller': renderUserManagement(content, 'teller'); break;
+case 'cs': renderUserManagement(content, 'cs'); break;
+case 'nasabah': renderNasabahManagement(content); break;
+case 'transaksi': renderTransaksi(content); break;
+case 'transfer': renderTransfer(content); break;
+case 'history': renderHistory(content); break;
+case 'settings': renderSettings(content); break;
+case 'password': renderChangePassword(content); break;
+default: renderDashboardContent(content);
+}
+};
+
+// ==================== DASHBOARD CONTENT ====================
+const renderDashboardContent = (container) => {
+const role = currentUser?.role;
+if (role === 'nasabah') {
+const balance = currentUser?.balance || 0;
+const recentTransactions = getTransactions()
+.filter(t => t.from_account === currentUser.phone || t.to_account === currentUser.phone)
+.slice(-5).reverse();
+container.innerHTML = `
+<div class="max-w-lg mx-auto">
+<div class="bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 rounded-3xl p-6 text-white shadow-2xl mb-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+<div class="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12"></div>
+<div class="relative">
+<p class="text-amber-100 text-sm mb-1">Saldo Rekening</p>
+<h2 id="nasabah-dashboard-balance" class="text-3xl font-bold mb-4">${formatRupiah(balance)}</h2>
+<div class="flex justify-between items-center">
+<div><p class="text-amber-100 text-xs">No. Rekening</p><p class="font-medium">${currentUser?.phone}</p></div>
+<div class="text-right"><p class="text-amber-100 text-xs">Nama</p><p class="font-medium">${currentUser?.name}</p></div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<button onclick="navigateTo('transfer')" class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition-all active:scale-95 flex flex-col items-center gap-3">
+<div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">${getIcon('paper-plane')}</div>
+<span class="font-semibold text-gray-700">Transfer</span>
+</button>
+<button onclick="navigateTo('history')" class="bg-white p-5 rounded-2xl shadow-md hover:shadow-lg transition-all active:scale-95 flex flex-col items-center gap-3">
+<div class="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">${getIcon('history')}</div>
+<span class="font-semibold text-gray-700">Riwayat</span>
+</button>
+</div>
+<div class="bg-white rounded-2xl shadow-md p-5">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-bold text-gray-800">Transaksi Terakhir</h3>
+<button onclick="navigateTo('history')" class="text-amber-600 text-sm font-medium">Lihat Semua</button>
+</div>
+<div class="space-y-3">
+${recentTransactions.length > 0 ? recentTransactions.map(t => {
+const isIncome = t.to_account === currentUser.phone;
+return `<div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full flex items-center justify-center ${t.transaction_type === 'setor' ? 'bg-green-100' : t.transaction_type === 'tarik' ? 'bg-red-100' : isIncome ? 'bg-green-100' : 'bg-blue-100'}">
+<svg class="w-5 h-5 ${t.transaction_type === 'setor' ? 'text-green-600' : t.transaction_type === 'tarik' ? 'text-red-600' : isIncome ? 'text-green-600' : 'text-blue-600'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+</div>
+<div><p class="font-medium text-gray-800 text-sm">${t.transaction_type === 'setor' ? 'Setor Tunai' : t.transaction_type === 'tarik' ? 'Tarik Tunai' : isIncome ? 'Transfer Masuk' : 'Transfer Keluar'}</p><p class="text-gray-400 text-xs">${formatDate(t.created_at)}</p></div>
+</div>
+<p class="font-bold ${isIncome ? 'text-green-600' : 'text-red-600'}">${isIncome ? '+' : '-'}${formatRupiah(t.amount)}</p>
+</div>`;
+}).join('') : '<p class="text-center text-gray-400 py-6 text-sm">Belum ada transaksi</p>'}
+</div>
+</div>
+</div>`;
+return;
+}
+const totalAdmin = getUsersByRole('admin').length;
+const totalTeller = getUsersByRole('teller').length;
+const totalCS = getUsersByRole('cs').length;
+const totalNasabah = getUsersByRole('nasabah').filter(n => n.status === 'active').length;
+const pendingNasabah = getPendingNasabah().length;
+const totalBalance = getTotalBalance();
+const cards = [];
+if (['direktur', 'admin'].includes(role)) {
+cards.push(
+{ label: 'Total Admin', value: totalAdmin, icon: 'user-shield', color: 'blue', click: "showUserList('admin')" },
+{ label: 'Total Teller', value: totalTeller, icon: 'user-cash', color: 'green', click: "showUserList('teller')" },
+{ label: 'Total CS', value: totalCS, icon: 'headset', color: 'purple', click: "showUserList('cs')" },
+{ label: 'Total Nasabah', value: totalNasabah, icon: 'users', color: 'amber', click: "showUserList('nasabah')" },
+{ label: 'Total Saldo', value: formatRupiah(totalBalance), icon: 'exchange', color: 'emerald', click: null }
+);
+if (pendingNasabah > 0) cards.push({ label: 'Menunggu Konfirmasi', value: pendingNasabah, icon: 'bell', color: 'red', click: "showNotifications()" });
+} else if (role === 'teller') {
+cards.push({ label: 'Transaksi Hari Ini', value: getTransactions().filter(t => new Date(t.created_at).toDateString() === new Date().toDateString()).length, icon: 'exchange', color: 'amber' });
+} else if (role === 'cs') {
+cards.push(
+{ label: 'Total Nasabah', value: totalNasabah, icon: 'users', color: 'amber', click: "showUserList('nasabah')" },
+{ label: 'Menunggu Konfirmasi', value: pendingNasabah, icon: 'bell', color: 'red', click: "showNotifications()" }
+);
+}
+container.innerHTML = `
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+${cards.map(card => `
+<div class="bg-white rounded-xl shadow-md p-6 card-hover ${card.click ? 'cursor-pointer' : ''}" ${card.click ? `onclick="${card.click}"` : ''}>
+<div class="flex items-center justify-between">
+<div><p class="text-gray-500 text-sm">${card.label}</p><h3 class="text-2xl font-bold text-gray-800 mt-1">${card.value}</h3></div>
+<div class="w-12 h-12 rounded-full bg-${card.color}-100 flex items-center justify-center text-${card.color}-500">${getIcon(card.icon)}</div>
+</div>
+</div>`).join('')}
+</div>
+<div class="mt-8 bg-white rounded-xl shadow-md p-6">
+<h3 class="text-lg font-bold text-gray-800 mb-4">Transaksi Terbaru</h3>
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead><tr class="text-left text-gray-500 text-sm border-b">
+<th class="pb-3">Tanggal</th><th class="pb-3">Jenis</th><th class="pb-3">Dari/Ke</th><th class="pb-3">Jumlah</th>
+</tr></thead>
+<tbody>
+${getTransactions().slice(-5).reverse().map(t => `
+<tr class="border-b border-gray-100">
+<td class="py-3 text-sm">${formatDateTime(t.created_at)}</td>
+<td class="py-3"><span class="px-2 py-1 rounded-full text-xs ${t.transaction_type === 'setor' ? 'bg-green-100 text-green-600' : t.transaction_type === 'tarik' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${t.transaction_type}</span></td>
+<td class="py-3 text-sm">${t.from_name || '-'} → ${t.to_name || '-'}</td>
+<td class="py-3 font-medium">${formatRupiah(t.amount)}</td>
+</tr>`).join('') || '<tr><td colspan="4" class="py-4 text-center text-gray-400">Belum ada transaksi</td></tr>'}
+</tbody>
+</table>
+</div>
+</div>`;
+};
+
+// ==================== USER MANAGEMENT ====================
+const renderUserManagement = (container, role) => {
+const users = getUsersByRole(role);
+const roleLabel = { admin: 'Admin', teller: 'Teller', cs: 'Customer Service' }[role];
+container.innerHTML = `
+<div class="bg-white rounded-xl shadow-md p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-bold text-gray-800">Daftar ${roleLabel}</h3>
+${(currentUser?.role === 'direktur' || (currentUser?.role === 'admin' && role !== 'admin')) ? `
+<button onclick="showAddUserModal('${role}')" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-all flex items-center gap-2">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+Tambah ${roleLabel}
+</button>` : ''}
+</div>
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead><tr class="text-left text-gray-500 text-sm border-b">
+<th class="pb-3">Nama</th>
+<th class="pb-3">Username</th>
+<th class="pb-3">No. HP</th>
+<th class="pb-3">Status</th>
+<th class="pb-3">Tanggal Dibuat</th>
+<th class="pb-3">Aksi</th>
+</tr></thead>
+<tbody>
+${users.map(user => `
+<tr class="border-b border-gray-100 hover:bg-gray-50">
+<td class="py-3 font-medium text-gray-800">${user.name}</td>
+<td class="py-3 text-gray-500">${user.username}</td>
+<td class="py-3 text-gray-500">${user.phone}</td>
+<td class="py-3">
+<span class="px-2 py-1 rounded-full text-xs font-medium ${user.blocked ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">
+${user.blocked ? '🔒 Terblokir' : '✅ Aktif'}
+</span>
+</td>
+<td class="py-3 text-gray-500 text-sm">${formatDate(user.created_at)}</td>
+<td class="py-3">
+<div class="flex gap-2 flex-wrap">
+<button onclick="showEditUserModal('${user.__backendId}')" class="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-sm hover:bg-blue-200 transition-all">Edit</button>
+<button onclick="resetUserPassword('${user.__backendId}')" class="px-3 py-1 bg-amber-100 text-amber-600 rounded-lg text-sm hover:bg-amber-200 transition-all">Reset</button>
+<button onclick="confirmDeleteUser('${user.__backendId}')" class="px-3 py-1 bg-red-100 text-red-600 rounded-lg text-sm hover:bg-red-200 transition-all">Hapus</button>
+</div>
+</td>
+</tr>`).join('') || `<tr><td colspan="6" class="py-8 text-center text-gray-400">Belum ada ${roleLabel}</td></tr>`}
+</tbody>
+</table>
+</div>
+</div>`;
+};
+const showAddUserModal = (role) => {
+const roleLabel = { admin: 'Admin', teller: 'Teller', cs: 'Customer Service' }[role];
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-6">Tambah ${roleLabel} Baru</h3>
+<div class="space-y-4">
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+<input type="text" id="add-user-name" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Masukkan nama"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+<input type="text" id="add-user-username" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Masukkan username"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">No. HP</label>
+<input type="tel" id="add-user-phone" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="08xxxxxxxxxx"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+<input type="password" id="add-user-password" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Buat password"></div>
+${role === 'teller' ? `<div><label class="block text-sm font-medium text-gray-700 mb-2">PIN (6 digit angka)</label>
+<input type="password" id="add-user-pin" maxlength="6" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Buat PIN 6 digit"></div>` : ''}
+<div class="flex gap-3 pt-4">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">Batal</button>
+<button id="btn-add-user" onclick="handleAddUser('${role}')" class="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all">Simpan</button>
+</div>
+</div>
+</div>`;
+showModal(content);
+};
+const handleAddUser = async (role) => {
+const name = document.getElementById('add-user-name')?.value.trim();
+const username = document.getElementById('add-user-username')?.value.trim();
+const phone = document.getElementById('add-user-phone')?.value.trim();
+const password = document.getElementById('add-user-password')?.value;
+const pin = role === 'teller' ? document.getElementById('add-user-pin')?.value : undefined;
+if (role === 'teller' && pin && !/^\d{6}$/.test(pin)) {
+showToast('PIN harus 6 digit angka', 'error');
+return;
+}
+if (!name || !username || !password) { showToast('Mohon lengkapi semua data', 'error'); return; }
+if (getUserByUsername(username)) { showToast('Username sudah digunakan', 'error'); return; }
+const userData = {
+type: 'user', username: username, password: password, name: name, phone: phone || '-',
+role: role, status: 'active', created_at: new Date().toISOString(), created_by: currentUser?.name || 'System'
+};
+if (role === 'teller' && pin) {
+userData.pin = pin;
+}
+const result = await window.dataSdk.create(userData);
+hideLoading('btn-add-user');
+if (result.isOk) {
+closeModal();
+showToast(`${role.charAt(0).toUpperCase() + role.slice(1)} berhasil ditambahkan`, 'success');
+} else {
+showToast(result.error || 'Gagal menambahkan user', 'error');
+}
+};
+const showEditUserModal = (userId) => {
+const user = allData.find(d => d.__backendId === userId);
+if (!user) return;
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-6">Edit ${user.role}</h3>
+<div class="space-y-4">
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+<input type="text" id="edit-user-name" value="${user.name}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">No. HP</label>
+<input type="tel" id="edit-user-phone" value="${user.phone || ''}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500"></div>
+<div class="flex gap-3 pt-4">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">Batal</button>
+<button id="btn-edit-user" onclick="handleEditUser('${userId}')" class="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all">Simpan</button>
+</div>
+</div>
+</div>`;
+showModal(content);
+};
+const handleEditUser = async (userId) => {
+const user = allData.find(d => d.__backendId === userId);
+if (!user) return;
+const name = document.getElementById('edit-user-name')?.value.trim();
+const phone = document.getElementById('edit-user-phone')?.value.trim();
+if (!name) { showToast('Nama tidak boleh kosong', 'error'); return; }
+showLoading('btn-edit-user');
+const result = await window.dataSdk.update({ ...user, name: name, phone: phone || user.phone });
+hideLoading('btn-edit-user');
+if (result.isOk) {
+closeModal();
+showToast('Data berhasil diperbarui', 'success');
+} else {
+showToast(result.error || 'Gagal memperbarui data', 'error');
+}
+};
+const resetUserPassword = async (userId) => {
+const user = allData.find(d => d.__backendId === userId);
+if (!user) return;
+const isNasabah = user.role === 'nasabah';
+const content = `
+<div class="p-6 text-center">
+<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">${getIcon('key')}</div>
+<h3 class="text-xl font-bold text-gray-800 mb-2">Reset ${isNasabah ? 'Password & PIN' : 'Password'}</h3>
+<p class="text-gray-500 mb-6">${isNasabah ? `Password dan PIN untuk <strong>${user.name}</strong> akan direset menjadi "123456"<br><small class="text-gray-400">Akun yang terblokir akan dibuka kembali</small>` : `Password untuk <strong>${user.name}</strong> akan direset menjadi "123456"`}</p>
+<div class="flex gap-3">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50">Batal</button>
+<button id="btn-reset-pwd" onclick="confirmResetPassword('${userId}')" class="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600">Reset</button>
+</div>
+</div>`;
+showModal(content, 'sm');
+};
+const confirmResetPassword = async (userId) => {
+const user = allData.find(d => d.__backendId === userId);
+if (!user) return;
+showLoading('btn-reset-pwd');
+const updateData = { ...user, password: '123456' };
+if (user.role === 'nasabah' || user.role === 'teller') {
+updateData.pin = '123456';
+updateData.pin_attempts = 0;
+updateData.blocked = false;
+}
+const result = await window.dataSdk.update(updateData);
+hideLoading('btn-reset-pwd');
+if (result.isOk) {
+closeModal();
+const roleLabel = user.role === 'nasabah' ? 'Nasabah' :
+user.role === 'teller' ? 'Teller' : 'User';
+showToast(`${roleLabel} berhasil direset. Password & PIN sekarang: 123456`, 'success');
+} else {
+showToast(result.error || 'Gagal mereset password', 'error');
+}
+};
+const confirmDeleteUser = (userId) => {
+const user = allData.find(d => d.__backendId === userId);
+if (!user) return;
+const content = `
+<div class="p-6 text-center">
+<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+<svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+</div>
+<h3 class="text-xl font-bold text-gray-800 mb-2">Hapus User</h3>
+<p class="text-gray-500 mb-6">Yakin ingin menghapus <strong>${user.name}</strong>?</p>
+<div class="flex gap-3">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50">Batal</button>
+<button id="btn-delete-user" onclick="handleDeleteUser('${userId}')" class="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600">Hapus</button>
+</div>
+</div>`;
+showModal(content, 'sm');
+};
+const handleDeleteUser = async (userId) => {
+const user = allData.find(d => d.__backendId === userId);
+if (!user) return;
+showLoading('btn-delete-user');
+const result = await window.dataSdk.delete(user);
+hideLoading('btn-delete-user');
+if (result.isOk) {
+closeModal();
+showToast('User berhasil dihapus', 'success');
+} else {
+showToast(result.error || 'Gagal menghapus user', 'error');
+}
+};
+
+// ==================== TOGGLE NASABAH STATUS ====================
+const toggleNasabahStatus = async (nasabahId) => {
+const nasabah = allData.find(d => d.__backendId === nasabahId);
+if (!nasabah) return;
+const newStatus = nasabah.status === 'active' ? 'inactive' : 'active';
+const actionText = newStatus === 'active' ? 'mengaktifkan' : 'menonaktifkan';
+const content = `
+<div class="p-6 text-center">
+<div class="w-16 h-16 mx-auto mb-4 rounded-full ${newStatus === 'inactive' ? 'bg-orange-100' : 'bg-green-100'} flex items-center justify-center">
+<svg class="w-8 h-8 ${newStatus === 'inactive' ? 'text-orange-500' : 'text-green-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+${newStatus === 'inactive' ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>' : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>'}
+</svg>
+</div>
+<h3 class="text-xl font-bold text-gray-800 mb-2">${newStatus === 'inactive' ? 'Nonaktifkan' : 'Aktifkan'} Nasabah</h3>
+<p class="text-gray-500 mb-2">Yakin ingin ${actionText} akun <strong>${nasabah.name}</strong>?</p>
+${newStatus === 'inactive' ? '<p class="text-sm text-amber-600 mb-6">Nasabah tidak akan bisa login atau melakukan transaksi</p>' : '<p class="text-sm text-green-600 mb-6">Nasabah akan dapat login dan melakukan transaksi kembali</p>'}
+<div class="flex gap-3">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50">Batal</button>
+<button id="btn-toggle-status" onclick="confirmToggleStatus('${nasabahId}', '${newStatus}')" class="flex-1 px-4 py-3 ${newStatus === 'inactive' ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600'} text-white rounded-xl">Konfirmasi</button>
+</div>
+</div>`;
+showModal(content, 'sm');
+};
+const confirmToggleStatus = async (nasabahId, newStatus) => {
+const nasabah = allData.find(d => d.__backendId === nasabahId);
+if (!nasabah) return;
+showLoading('btn-toggle-status');
+const result = await window.dataSdk.update({ ...nasabah, status: newStatus });
+hideLoading('btn-toggle-status');
+if (result.isOk) {
+closeModal();
+showToast(`Akun ${nasabah.name} berhasil ${newStatus === 'inactive' ? 'dinonaktifkan' : 'diaktifkan'}`, 'success');
+} else {
+showToast(result.error || 'Gagal mengubah status', 'error');
+}
+};
+
+// ==================== 🆕 FITUR BARU: NASABAH MANAGEMENT DENGAN FILTER & CETAK ====================
+const renderNasabahManagement = (container) => {
+// Ambil semua nasabah
+let nasabahList = getUsersByRole('nasabah');
+
+// Filter default: hanya aktif
+const defaultStatus = 'active';
+nasabahList = nasabahList.filter(n => n.status === defaultStatus);
+
+const canAddNasabah = ['direktur', 'admin', 'cs'].includes(currentUser?.role);
+const canSeeSaldo = ['direktur', 'admin'].includes(currentUser?.role);
+
+container.innerHTML = `
+<div class="bg-white rounded-xl shadow-md p-6">
+<div class="flex flex-col gap-4 mb-6">
+<!-- Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<h3 class="text-lg font-bold text-gray-800">Daftar Nasabah</h3>
+<div class="flex flex-wrap gap-2">
+${canAddNasabah ? `
+<button onclick="showBroadcastModal()" class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-all flex items-center gap-2">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+Pengumuman
+</button>
+<button onclick="showAddNasabahModal()" class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-all flex items-center gap-2">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+Tambah Nasabah
+</button>` : ''}
+<!-- 🔥 TOMBOL CETAK FILTERED -->
+<button onclick="printFilteredNasabah()" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all flex items-center gap-2">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+Cetak Data
+</button>
+</div>
+</div>
+
+<!-- 🔥 FILTER BARU: Kategori, Kelas, Sort Saldo -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 p-4 bg-gray-50 rounded-xl">
+<!-- Search -->
+<input type="text" id="search-nasabah" placeholder="Cari nama/no.rekening..." class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500" oninput="filterNasabah()">
+
+<!-- Status Filter -->
+<select id="filter-status" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500" onchange="filterNasabah()">
+<option value="active">Aktif</option><option value="inactive">Tidak Aktif</option><option value="all">Semua</option>
+</select>
+
+<!-- 🔥 Kategori Filter -->
+<select id="filter-category" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500" onchange="filterNasabah()">
+<option value="all">Semua Kategori</option>
+<option value="umum">Umum</option>
+<option value="pelajar">Pelajar</option>
+</select>
+
+<!-- 🔥 Kelas Filter (hanya muncul jika kategori=pelajar) -->
+<select id="filter-kelas" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500" onchange="filterNasabah()" style="display:none;">
+<option value="all">Semua Kelas</option>
+</select>
+
+<!-- 🔥 Sort Saldo -->
+<select id="sort-saldo" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500" onchange="filterNasabah()">
+<option value="none">Urutan Default</option>
+<option value="highest">Saldo Tertinggi</option>
+<option value="lowest">Saldo Terendah</option>
+<option value="az">A - Z (Nama)</option>  // ← TAMBAHAN BARU
+</select>
+</div>
+</div>
+
+<!-- Table -->
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead><tr class="text-left text-gray-500 text-sm border-b">
+<th class="pb-3">Nama</th><th class="pb-3">No. Rekening</th><th class="pb-3">Kategori</th><th class="pb-3">Kelas</th><th class="pb-3">Tanggal Bergabung</th><th class="pb-3">Status</th>
+${canSeeSaldo ? '<th class="pb-3">Saldo</th>' : ''}<th class="pb-3">Aksi</th>
+</tr></thead>
+<tbody id="nasabah-table-body">${renderNasabahRows(nasabahList, canSeeSaldo)}</tbody>
+</table>
+</div>
+<div id="pagination" class="mt-4 flex justify-center gap-2"></div>
+</div>`;
+
+// Setup pagination
+setupPagination(nasabahList.length);
+
+// 🔥 Initialize kelas dropdown dengan data unik
+populateKelasDropdown();
+
+// 🔥 Toggle visibility kelas dropdown berdasarkan kategori
+document.getElementById('filter-category')?.addEventListener('change', function() {
+const kelasField = document.getElementById('filter-kelas');
+if (this.value === 'pelajar') {
+kelasField.style.display = 'block';
+populateKelasDropdown(); // Refresh kelas options
+} else {
+kelasField.style.display = 'none';
+kelasField.value = 'all';
+filterNasabah();
+}
+});
+};
+
+// 🔥 Fungsi untuk mengisi dropdown kelas dengan data unik dari nasabah pelajar
+const populateKelasDropdown = () => {
+const kelasSelect = document.getElementById('filter-kelas');
+if (!kelasSelect) return;
+
+// Simpan value saat ini
+const currentVal = kelasSelect.value;
+
+// Reset options (keep "all")
+kelasSelect.innerHTML = '<option value="all">Semua Kelas</option>';
+
+// Ambil semua nasabah pelajar aktif
+const pelajarList = getUsersByRole('nasabah').filter(n => n.category === 'pelajar' && n.kelas);
+
+// Ambil kelas unik
+const uniqueKelas = [...new Set(pelajarList.map(n => n.kelas).filter(k => k))].sort();
+
+// Tambahkan ke dropdown
+uniqueKelas.forEach(kelas => {
+const option = document.createElement('option');
+option.value = kelas;
+option.textContent = kelas;
+kelasSelect.appendChild(option);
+});
+
+// Restore selected value jika masih ada
+if (uniqueKelas.includes(currentVal)) {
+kelasSelect.value = currentVal;
+}
+};
+
+// 🔥 Fungsi render rows dengan filter dan sort
+const renderNasabahRows = (nasabahList, canSeeSaldo, page = 1) => {
+// 🔥 Apply filters
+let filtered = [...nasabahList];
+
+// Filter by category
+const category = document.getElementById('filter-category')?.value || 'all';
+if (category !== 'all') {
+filtered = filtered.filter(n => n.category === category);
+}
+
+// Filter by kelas (only if category is pelajar)
+if (category === 'pelajar') {
+const kelas = document.getElementById('filter-kelas')?.value || 'all';
+if (kelas !== 'all') {
+filtered = filtered.filter(n => n.kelas === kelas);
+}
+}
+
+// 🔥 Sort by saldo
+const sortType = document.getElementById('sort-saldo')?.value || 'none';
+if (sortType === 'highest') {
+  nasabahList.sort((a, b) => (b.balance || 0) - (a.balance || 0));
+} else if (sortType === 'lowest') {
+  nasabahList.sort((a, b) => (a.balance || 0) - (b.balance || 0));
+} else if (sortType === 'az') {  // ← TAMBAHAN BARU
+  nasabahList.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+}
+
+// Pagination
+const start = (page - 1) * itemsPerPage;
+const end = start + itemsPerPage;
+const paginatedList = filtered.slice(start, end);
+
+// Render rows
+return paginatedList.map(n => `
+<tr class="border-b border-gray-100 hover:bg-gray-50 ${n.status === 'inactive' ? 'opacity-60' : ''}">
+<td class="py-3"><button onclick="showNasabahDetail('${n.__backendId}')" class="text-amber-600 hover:text-amber-700 font-medium">${n.name}</button></td>
+<td class="py-3 text-gray-500">${n.phone}</td>
+<td class="py-3"><span class="px-2 py-1 rounded-full text-xs ${n.category === 'pelajar' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'}">${n.category === 'pelajar' ? 'Pelajar' : 'Umum'}</span></td>
+<td class="py-3 text-gray-500 text-sm">${n.kelas || '-'}</td>
+<!-- 🔥 TAMBAHAN: Kolom Tanggal Bergabung -->
+<td class="py-3 text-gray-500 text-sm">${formatDate(n.created_at)}</td>
+<td class="py-3"><span class="px-2 py-1 rounded-full text-xs ${n.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}">${n.status === 'active' ? 'Aktif' : 'Tidak Aktif'}</span></td>
+${canSeeSaldo ? `<td class="py-3 font-medium">${formatRupiah(n.balance)}</td>` : ''}
+<td class="py-3">
+<div class="flex gap-2">
+<button onclick="showSendMessageModal('${n.__backendId}')" class="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-lg text-sm hover:bg-indigo-200">Pesan</button>
+<button onclick="showEditNasabahModal('${n.__backendId}')" class="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-sm hover:bg-blue-200">Edit</button>
+<button onclick="resetUserPassword('${n.__backendId}')" class="px-3 py-1 bg-amber-100 text-amber-600 rounded-lg text-sm hover:bg-amber-200">Reset</button>
+<button onclick="toggleNasabahStatus('${n.__backendId}')" class="px-3 py-1 ${n.status === 'active' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'} rounded-lg text-sm hover:opacity-80">${n.status === 'active' ? 'Nonaktifkan' : 'Aktifkan'}</button>
+<button onclick="showPrintRekening('${n.__backendId}')" class="px-3 py-1 bg-purple-100 text-purple-600 rounded-lg text-sm hover:bg-purple-200">Cetak</button>
+<button onclick="confirmDeleteUser('${n.__backendId}')" class="px-3 py-1 bg-red-100 text-red-600 rounded-lg text-sm hover:bg-red-200">Hapus</button>
+</div>
+</td>
+</tr>`).join('') || `<tr><td colspan="${canSeeSaldo ? 7 : 6}" class="py-8 text-center text-gray-400">Tidak ada data nasabah</td></tr>`;
+};
+
+// 🔥 Update filterNasabah untuk handle filter baru
+const filterNasabah = debounce(() => {
+const search = document.getElementById('search-nasabah')?.value.toLowerCase() || '';
+const statusFilter = document.getElementById('filter-status')?.value || 'active';
+const categoryFilter = document.getElementById('filter-category')?.value || 'all';
+const kelasFilter = document.getElementById('filter-kelas')?.value || 'all';
+
+let nasabahList = getUsersByRole('nasabah');
+
+// Filter status
+if (statusFilter !== 'all') nasabahList = nasabahList.filter(n => n.status === statusFilter);
+
+// Filter search
+if (search) {
+nasabahList = nasabahList.filter(n => 
+n.name.toLowerCase().includes(search) || 
+n.phone.includes(search)
+);
+}
+
+// 🔥 Filter category
+if (categoryFilter !== 'all') {
+nasabahList = nasabahList.filter(n => n.category === categoryFilter);
+}
+
+// 🔥 Filter kelas (only if category is pelajar)
+if (categoryFilter === 'pelajar' && kelasFilter !== 'all') {
+nasabahList = nasabahList.filter(n => n.kelas === kelasFilter);
+}
+
+// 🔥 Sort by saldo
+const sortType = document.getElementById('sort-saldo')?.value || 'none';
+if (sortType === 'highest') {
+  nasabahList.sort((a, b) => (b.balance || 0) - (a.balance || 0));
+} else if (sortType === 'lowest') {
+  nasabahList.sort((a, b) => (a.balance || 0) - (b.balance || 0));
+} else if (sortType === 'az') {  // ← TAMBAHAN BARU
+  nasabahList.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+}
+
+const canSeeSaldo = ['direktur', 'admin'].includes(currentUser?.role);
+currentPage = 1;
+const tbody = document.getElementById('nasabah-table-body');
+if (tbody) tbody.innerHTML = renderNasabahRows(nasabahList, canSeeSaldo, 1);
+setupPagination(nasabahList.length);
+}, 300);
+
+// 🔥 Fungsi CETAK NASABAH (filtered)
+const printFilteredNasabah = () => {
+// Ambil filter values
+const statusFilter = document.getElementById('filter-status')?.value || 'active';
+const categoryFilter = document.getElementById('filter-category')?.value || 'all';
+const kelasFilter = document.getElementById('filter-kelas')?.value || 'all';
+const search = document.getElementById('search-nasabah')?.value.toLowerCase() || '';
+const sortType = document.getElementById('sort-saldo')?.value || 'none';
+
+// Ambil dan filter data
+let nasabahList = getUsersByRole('nasabah');
+
+if (statusFilter !== 'all') nasabahList = nasabahList.filter(n => n.status === statusFilter);
+if (search) {
+nasabahList = nasabahList.filter(n => 
+n.name.toLowerCase().includes(search) || n.phone.includes(search)
+);
+}
+if (categoryFilter !== 'all') nasabahList = nasabahList.filter(n => n.category === categoryFilter);
+if (categoryFilter === 'pelajar' && kelasFilter !== 'all') {
+nasabahList = nasabahList.filter(n => n.kelas === kelasFilter);
+}
+
+// Sort
+if (sortType === 'highest') {
+nasabahList.sort((a, b) => (b.balance || 0) - (a.balance || 0));
+} else if (sortType === 'lowest') {
+nasabahList.sort((a, b) => (a.balance || 0) - (b.balance || 0));
+}
+
+// Generate print content
+const filterText = [];
+if (categoryFilter !== 'all') filterText.push(`Kategori: ${categoryFilter === 'pelajar' ? 'Pelajar' : 'Umum'}`);
+if (categoryFilter === 'pelajar' && kelasFilter !== 'all') filterText.push(`Kelas: ${kelasFilter}`);
+if (statusFilter !== 'all') filterText.push(`Status: ${statusFilter === 'active' ? 'Aktif' : 'Tidak Aktif'}`);
+if (sortType !== 'none') filterText.push(`Urutan: ${sortType === 'highest' ? 'Saldo Tertinggi' : 'Saldo Terendah'}`);
+
+const content = `
+<div class="p-6 bg-white" id="print-area">
+<div class="text-center mb-6 border-b pb-4">
+<h2 class="text-2xl font-bold mt-4">${config.app_title}</h2>
+<p class="text-gray-500">${config.school_name}</p>
+</div>
+<div class="mb-6">
+<h3 class="font-bold text-lg mb-3">LAPORAN DATA NASABAH</h3>
+<div class="grid grid-cols-2 gap-2 text-sm bg-gray-50 rounded-xl p-4">
+<p><span class="text-gray-500">Tanggal Cetak:</span> ${new Date().toLocaleDateString('id-ID')}</p>
+<p><span class="text-gray-500">Waktu:</span> ${new Date().toLocaleTimeString('id-ID')}</p>
+<p class="col-span-2"><span class="text-gray-500">Filter:</span> <strong>${filterText.join(' • ') || 'Semua Nasabah'}</strong></p>
+<p><span class="text-gray-500">Total Nasabah:</span> <strong>${nasabahList.length}</strong></p>
+<p><span class="text-gray-500">Dicetak oleh:</span> ${currentUser?.name}</p>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-sm border">
+<thead><tr class="bg-gray-100 text-left">
+<th class="p-2 border">No</th>
+<th class="p-2 border">Nama</th>
+<th class="p-2 border">No. Rekening</th>
+<th class="p-2 border">Kategori</th>
+<th class="p-2 border">Kelas</th>
+<th class="p-2 border">Tanggal Bergabung</th>
+<th class="p-2 border text-right">Saldo</th>
+<th class="p-2 border">Status</th>
+</tr></thead>
+<tbody>
+${nasabahList.map((n, idx) => `
+<tr class="border-b">
+<td class="p-2 border text-center">${idx + 1}</td>
+<td class="p-2 border font-medium">${n.name}</td>
+<td class="p-2 border">${n.phone}</td>
+<td class="p-2 border"><span class="px-2 py-1 rounded-full text-xs ${n.category === 'pelajar' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'}">${n.category === 'pelajar' ? 'Pelajar' : 'Umum'}</span></td>
+<td class="p-2 border">${n.kelas || '-'}</td>
+<!-- 🔥 TAMBAHAN: Tanggal Bergabung di Print -->
+<td class="p-2 border">${formatDate(n.created_at)}</td>
+<td class="p-2 border text-right font-medium">${formatRupiah(n.balance)}</td>>
+<td class="p-2 border"><span class="px-2 py-1 rounded-full text-xs ${n.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}">${n.status === 'active' ? 'Aktif' : 'Tidak Aktif'}</span></td>
+</tr>`).join('') || '<tr><td colspan="7" class="p-4 text-center text-gray-400">Tidak ada data</td></tr>'}
+</tbody>
+</table>
+</div>
+<div class="mt-6 bg-gray-50 rounded-xl p-4">
+<h4 class="font-bold mb-3">Ringkasan Saldo:</h4>
+<div class="grid grid-cols-3 gap-4 text-sm">
+<div><p class="text-gray-500">Total Saldo:</p><p class="font-bold text-amber-600 text-lg">${formatRupiah(nasabahList.reduce((sum, n) => sum + (n.balance || 0), 0))}</p></div>
+<div><p class="text-gray-500">Rata-rata Saldo:</p><p class="font-bold text-blue-600 text-lg">${formatRupiah(nasabahList.length > 0 ? nasabahList.reduce((sum, n) => sum + (n.balance || 0), 0) / nasabahList.length : 0)}</p></div>
+<div><p class="text-gray-500">Saldo Tertinggi:</p><p class="font-bold text-green-600 text-lg">${formatRupiah(Math.max(...nasabahList.map(n => n.balance || 0), 0))}</p></div>
+</div>
+</div>
+<div class="mt-12 flex justify-end">
+<div class="text-center w-48">
+<p class="text-sm text-gray-700 mb-16">Kerinci, ${new Date().toLocaleDateString('id-ID')}<br>Petugas Pencetak,</p>
+<p class="font-bold text-gray-800 underline">${currentUser?.name || 'Petugas'}</p>
+<p class="text-xs text-gray-500 capitalize">${currentUser?.role || 'Staff'}</p>
+</div>
+</div>
+<div class="mt-6 flex justify-end gap-3 print-hide">
+<button onclick="closeModal()" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200">Tutup</button>
+<button onclick="window.print()" class="px-6 py-2 bg-purple-500 text-white rounded-xl hover:bg-purple-600">Cetak</button>
+</div>
+</div>`;
+showModal(content, '4xl');
+};
+
+// ==================== PAGINATION ====================
+let currentPage = 1;
+const itemsPerPage = 10;
+const setupPagination = (totalItems) => {
+const totalPages = Math.ceil(totalItems / itemsPerPage);
+const pagination = document.getElementById('pagination');
+if (!pagination || totalPages <= 1) return;
+let html = '';
+for (let i = 1; i <= totalPages; i++) {
+html += `<button onclick="goToPage(${i})" class="px-3 py-1 rounded ${currentPage === i ? 'bg-amber-500 text-white' : 'bg-gray-100 hover:bg-gray-200'}">${i}</button>`;
+}
+pagination.innerHTML = html;
+};
+const goToPage = (page) => {
+currentPage = page;
+const nasabahList = getUsersByRole('nasabah').filter(n => n.status === 'active');
+const canSeeSaldo = ['direktur', 'admin'].includes(currentUser?.role);
+const tbody = document.getElementById('nasabah-table-body');
+if (tbody) tbody.innerHTML = renderNasabahRows(nasabahList, canSeeSaldo, page);
+setupPagination(nasabahList.length);
+};
+
+// ==================== EDIT NASABAH ====================
+const showEditNasabahModal = (nasabahId) => {
+const nasabah = allData.find(d => d.__backendId === nasabahId);
+if (!nasabah) return;
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-6">Edit Nasabah</h3>
+<div class="space-y-4">
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+<input type="text" id="edit-nasabah-name" value="${nasabah.name}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">No. Rekening / No. HP</label>
+<input type="tel" id="edit-nasabah-phone" value="${nasabah.phone}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+<select id="edit-nasabah-category" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" onchange="toggleEditNasabahKelasField()">
+<option value="pelajar" ${nasabah.category === 'pelajar' ? 'selected' : ''}>Pelajar</option>
+<option value="umum" ${nasabah.category === 'umum' ? 'selected' : ''}>Umum</option>
+</select></div>
+<div id="edit-nasabah-kelas-field" style="display: ${nasabah.category === 'pelajar' ? 'block' : 'none'}">
+<label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+<input type="text" id="edit-nasabah-kelas" value="${nasabah.kelas || ''}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Contoh: X RPL 1">
+</div>
+<div class="flex gap-3 pt-4">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">Batal</button>
+<button id="btn-edit-nasabah" onclick="handleEditNasabah('${nasabahId}')" class="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all">Simpan</button>
+</div>
+</div>
+</div>`;
+showModal(content);
+};
+const toggleEditNasabahKelasField = () => {
+const category = document.getElementById('edit-nasabah-category')?.value;
+const kelasField = document.getElementById('edit-nasabah-kelas-field');
+if (kelasField) {
+kelasField.style.display = category === 'pelajar' ? 'block' : 'none';
+if (category !== 'pelajar') {
+const kelasInput = document.getElementById('edit-nasabah-kelas');
+if (kelasInput) kelasInput.value = '';
+}
+}
+};
+const handleEditNasabah = async (nasabahId) => {
+const nasabah = allData.find(d => d.__backendId === nasabahId);
+if (!nasabah) return;
+const name = document.getElementById('edit-nasabah-name')?.value.trim();
+const phone = document.getElementById('edit-nasabah-phone')?.value.trim();
+const category = document.getElementById('edit-nasabah-category')?.value;
+const kelas = document.getElementById('edit-nasabah-kelas')?.value.trim();
+if (!name || !phone) { showToast('Nama dan No. Rekening tidak boleh kosong', 'error'); return; }
+if (category === 'pelajar' && !kelas) { showToast('Kelas harus diisi untuk pelajar', 'error'); return; }
+if (phone !== nasabah.phone && getUserByPhone(phone)) {
+showToast('No. Rekening/HP sudah terdaftar untuk user lain', 'error'); return;
+}
+showLoading('btn-edit-nasabah');
+const result = await window.dataSdk.update({
+...nasabah, name: name, phone: phone, username: phone, category: category,
+kelas: category === 'pelajar' ? kelas : ''
+});
+hideLoading('btn-edit-nasabah');
+if (result.isOk) {
+closeModal();
+showToast('Data nasabah berhasil diperbarui', 'success');
+} else {
+showToast(result.error || 'Gagal memperbarui data', 'error');
+}
+};
+
+// ==================== TAMBAH NASABAH ====================
+const showAddNasabahModal = () => {
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-6">Tambah Nasabah Baru</h3>
+<div class="space-y-4">
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+<input type="text" id="add-nasabah-name" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Masukkan nama"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">No. HP/WA (No. Rekening)</label>
+<input type="tel" id="add-nasabah-phone" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="08xxxxxxxxxx"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+<select id="add-nasabah-category" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" onchange="toggleRegKelasField()">
+<option value="pelajar">Pelajar</option><option value="umum">Umum</option>
+</select></div>
+<div id="reg-kelas-field"><label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+<input type="text" id="reg-kelas" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent" placeholder="Contoh: X RPL 1" autocomplete="off"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+<input type="password" id="add-nasabah-password" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Buat password"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">PIN (6 digit)</label>
+<input type="password" id="add-nasabah-pin" maxlength="6" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Buat PIN"></div>
+<div class="flex gap-3 pt-4">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50">Batal</button>
+<button id="btn-add-nasabah" onclick="handleAddNasabah()" class="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600">Simpan</button>
+</div>
+</div>
+</div>`;
+showModal(content);
+};
+const handleAddNasabah = async () => {
+const name = document.getElementById('add-nasabah-name')?.value.trim();
+const phone = document.getElementById('add-nasabah-phone')?.value.trim();
+const category = document.getElementById('add-nasabah-category')?.value;
+const kelas = document.getElementById('reg-kelas')?.value.trim() || '';
+const password = document.getElementById('add-nasabah-password')?.value;
+const pin = document.getElementById('add-nasabah-pin')?.value;
+if (!name || !phone || !password || !pin) { showToast('Mohon lengkapi semua data', 'error'); return; }
+if (!/^08\d{8,12}$/.test(phone)) { showToast('Format nomor HP tidak valid', 'error'); return; }
+if (!/^\d{6}$/.test(pin)) { showToast('PIN harus 6 digit angka', 'error'); return; }
+if (getUserByPhone(phone)) { showToast('Nomor HP sudah terdaftar', 'error'); return; }
+showLoading('btn-add-nasabah');
+const result = await window.dataSdk.create({
+type: 'user', username: phone, password: password, pin: pin, name: name, phone: phone,
+role: 'nasabah', category: category, kelas: category === 'pelajar' ? kelas : '',
+balance: 0, status: 'active', pin_attempts: 0, blocked: false,
+created_at: new Date().toISOString(), created_by: currentUser?.name || 'System'
+});
+hideLoading('btn-add-nasabah');
+if (result.isOk) {
+closeModal();
+showToast('Nasabah berhasil ditambahkan', 'success');
+} else {
+showToast(result.error || 'Gagal menambahkan nasabah', 'error');
+}
+};
+const showNasabahDetail = (nasabahId) => {
+const nasabah = allData.find(d => d.__backendId === nasabahId);
+if (!nasabah) return;
+const transactions = getTransactions().filter(t => t.from_account === nasabah.phone || t.to_account === nasabah.phone).slice(-10).reverse();
+const canSeeSaldo = ['direktur', 'admin'].includes(currentUser?.role);
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-6">Detail Nasabah</h3>
+<div class="bg-gray-50 rounded-xl p-4 mb-6">
+<div class="grid grid-cols-2 gap-4">
+<div><p class="text-gray-500 text-sm">Nama</p><p class="font-medium">${nasabah.name}</p></div>
+<div><p class="text-gray-500 text-sm">No. Rekening</p><p class="font-medium">${nasabah.phone}</p></div>
+<div><p class="text-gray-500 text-sm">Kategori</p><p class="font-medium capitalize">${nasabah.category}</p></div>
+${nasabah.category === 'pelajar' ? `<div><p class="text-gray-500 text-sm">Kelas</p><p class="font-medium">${nasabah.kelas || '-'}</p></div>` : ''}
+<!-- 🔥 TAMBAHAN: Tanggal Bergabung -->
+<div><p class="text-gray-500 text-sm">Tanggal Bergabung</p><p class="font-medium">${formatDate(nasabah.created_at)}</p></div>
+${canSeeSaldo ? `<div><p class="text-gray-500 text-sm">Saldo</p><p class="font-bold text-amber-600">${formatRupiah(nasabah.balance)}</p></div>` : ''}
+</div>
+</div>
+<h4 class="font-bold text-gray-700 mb-3">Riwayat Transaksi Terakhir</h4>
+<div class="max-h-64 overflow-y-auto">
+<table class="w-full text-sm">
+<thead class="sticky top-0 bg-white"><tr class="text-left text-gray-500 border-b">
+<th class="pb-2">Tanggal</th><th class="pb-2">Jenis</th><th class="pb-2">Jumlah</th>
+</tr></thead>
+<tbody>
+${transactions.map(t => `
+<tr class="border-b border-gray-100">
+<td class="py-2">${formatDateTime(t.created_at)}</td>
+<td class="py-2"><span class="px-2 py-1 rounded-full text-xs ${t.transaction_type === 'setor' ? 'bg-green-100 text-green-600' : t.transaction_type === 'tarik' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${t.transaction_type}</span></td>
+<td class="py-2 font-medium">${formatRupiah(t.amount)}</td>
+</tr>`).join('') || '<tr><td colspan="3" class="py-4 text-center text-gray-400">Belum ada transaksi</td></tr>'}
+</tbody>
+</table>
+</div>
+<div class="mt-6 flex justify-end"><button onclick="closeModal()" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200">Tutup</button></div>
+</div>`;
+showModal(content, 'lg');
+};
+
+// ==================== TRANSAKSI (SETOR/TARIK) ====================
+// ==================== TRANSAKSI (SETOR/TARIK) - DIPERBAIKI ====================
+const renderTransaksi = (container) => {
+  container.innerHTML = `
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md p-6">
+      <h3 class="text-lg font-bold text-gray-800 mb-6">Transaksi Setor/Tarik Tunai</h3>
+      <div class="space-y-4">
+        <div><label class="block text-sm font-medium text-gray-700 mb-2">Jenis Transaksi</label>
+        <select id="trx-type" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500"><option value="setor">Setor Tunai</option><option value="tarik">Tarik Tunai</option></select></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-2">No. Rekening Nasabah</label>
+        <input type="text" id="trx-account" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Masukkan no. rekening" oninput="lookupNasabah()">
+        <div id="trx-nasabah-info" class="mt-2 text-sm text-gray-500"></div></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-2">Jumlah</label>
+        <input type="text" id="trx-amount" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Rp 0" oninput="formatAmountInput(this)"></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
+        <input type="text" id="trx-desc" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Keterangan (opsional)"></div>
+        <button id="btn-trx" onclick="handleTransaction()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all">Proses Transaksi</button>
+      </div>
+    </div>
+  </div>`;
+};
+
+const lookupNasabah = debounce(() => {
+  const account = document.getElementById('trx-account')?.value.trim() || '';
+  const info = document.getElementById('trx-nasabah-info');
+  if (!info) return;
+  if (account.length >= 10) {
+    const nasabah = getUserByPhone(account);
+    if (nasabah && nasabah.status === 'active') {
+      // HAPUS SALDO - cukup tampilkan nama
+      info.innerHTML = `<span class="text-green-600">✓ ${nasabah.name}</span>`;
+    } else {
+      info.innerHTML = `<span class="text-red-500">✗ Nasabah tidak ditemukan</span>`;
+    }
+  } else {
+    info.innerHTML = '';
+  }
+}, 200);
+
+const formatAmountInput = (input) => {
+  if (!input) return;
+  let value = input.value.replace(/[^\d]/g, '');
+  input.value = value ? formatRupiah(parseInt(value)) : '';
+};
+
+const handleTransaction = async () => {
+  // Validasi PIN Teller jika ada
+  if (currentUser?.role === 'teller') {
+    if (currentUser?.blocked) {
+      showBlockedModal();
+      return;
+    }
+    const pin = await showTellerPinModal();
+    if (!pin) {
+      showToast('Transaksi dibatalkan', 'error');
+      return;
+    }
+    if (pin !== currentUser?.pin) {
+      const result = await handleTellerPinError(currentUser.__backendId, currentUser?.pin_attempts);
+      if (result?.blocked) {
+        showBlockedModal();
+        return;
+      } else {
+        const remaining = 3 - result.attempts;
+        showPinErrorModal(remaining);
+        return;
+      }
+    }
+    await resetTellerPinAttempts(currentUser.__backendId);
+  }
+
+  const type = document.getElementById('trx-type')?.value;
+  const account = document.getElementById('trx-account')?.value.trim();
+  const amount = parseRupiah(document.getElementById('trx-amount')?.value);
+  const desc = document.getElementById('trx-desc')?.value.trim();
+  
+  const nasabah = getUserByPhone(account);
+  if (!nasabah || nasabah.status !== 'active') { 
+    showToast('Nasabah tidak ditemukan', 'error'); 
+    return; 
+  }
+  if (!amount || amount <= 0) { 
+    showToast('Masukkan jumlah yang valid', 'error'); 
+    return; 
+  }
+  if (type === 'tarik' && nasabah.balance < amount) { 
+    showToast('Saldo tidak mencukupi', 'error'); 
+    return; 
+  }
+
+  // 🔥 ANTI-DUPLIKASI: Generate unique transaction key
+  const transactionKey = `trx_${account}_${amount}_${type}_${Date.now()}`;
+  
+  // Cek apakah transaksi sedang diproses
+  const processingKey = sessionStorage.getItem('currentTransaction');
+  if (processingKey) {
+    showToast('Transaksi sebelumnya masih diproses...', 'warning');
+    return;
+  }
+  
+  // Simpan key transaksi saat ini
+  sessionStorage.setItem('currentTransaction', transactionKey);
+  
+  showLoading('btn-trx');
+  
+  try {
+    const newBalance = type === 'setor' ? nasabah.balance + amount : nasabah.balance - amount;
+    const now = new Date().toISOString();
+    
+    // 🔥 LANGKAH 1: Buat transaksi
+    const transactionData = {
+      type: 'transaction', 
+      transaction_type: type, 
+      amount: amount,
+      from_account: type === 'tarik' ? account : '-', 
+      to_account: type === 'setor' ? account : '-',
+      from_name: type === 'tarik' ? nasabah.name : currentUser?.name,
+      to_name: type === 'setor' ? nasabah.name : currentUser?.name,
+      description: desc || `${type === 'setor' ? 'Setor' : 'Tarik'} Tunai`,
+      teller_name: currentUser?.name, 
+      created_at: now,
+      __tempKey: transactionKey // Untuk tracking
+    };
+    
+    const resultTrx = await window.dataSdk.create(transactionData);
+    
+    if (!resultTrx.isOk) {
+      throw new Error('Gagal membuat transaksi: ' + (resultTrx.error || 'Unknown error'));
+    }
+    
+    // 🔥 LANGKAH 2: Update saldo
+    const resultUpdate = await window.dataSdk.update({ ...nasabah, balance: newBalance });
+    
+    if (!resultUpdate.isOk) {
+      // 🔥 ROLLBACK: Hapus transaksi jika update saldo gagal
+      const transactions = getTransactions();
+      const failedTransaction = transactions.find(t => 
+        t.__tempKey === transactionKey || 
+        (t.transaction_type === type && 
+         t.amount === amount && 
+         t.to_account === (type === 'setor' ? account : '-') &&
+         new Date(t.created_at) > new Date(Date.now() - 10000))
+      );
+      
+      if (failedTransaction) {
+        await window.dataSdk.delete(failedTransaction);
+      }
+      
+      throw new Error('Update saldo gagal: ' + (resultUpdate.error || 'Unknown error'));
+    }
+    
+    // ✅ SUKSES
+    hideLoading('btn-trx');
+    sessionStorage.removeItem('currentTransaction');
+    
+    const nowDate = new Date();
+    showSuccessModal('Transaksi Berhasil!', `
+      <div class="space-y-2">
+        <p><span class="text-gray-500">Tanggal:</span> ${nowDate.toLocaleDateString('id-ID')}</p>
+        <p><span class="text-gray-500">Jam:</span> ${nowDate.toLocaleTimeString('id-ID')}</p>
+        <p><span class="text-gray-500">Jenis:</span> <strong>${type === 'setor' ? 'Setor Tunai' : 'Tarik Tunai'}</strong></p>
+        <p><span class="text-gray-500">Jumlah:</span> <strong class="text-amber-600">${formatRupiah(amount)}</strong></p>
+        <p><span class="text-gray-500">No. Rekening:</span> ${account}</p>
+        <p><span class="text-gray-500">Nama:</span> ${nasabah.name}</p>
+        <p><span class="text-gray-500">Keterangan:</span> ${desc || '-'}</p>
+      </div>`);
+    
+    // Reset form
+    ['trx-account', 'trx-amount', 'trx-desc', 'trx-nasabah-info'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (id === 'trx-nasabah-info') el.innerHTML = '';
+        else el.value = '';
+      }
+    });
+    
+  } catch (error) {
+    console.error('Transaction error:', error);
+    hideLoading('btn-trx');
+    sessionStorage.removeItem('currentTransaction');
+    showToast(error.message || 'Gagal memproses transaksi', 'error');
+  }
+};
+
+// ==================== TRANSFER (NASABAH) ====================
+const renderTransfer = (container) => {
+const nasabah = currentUser;
+const settings = getSettings();
+const maxTransfer = nasabah?.category === 'pelajar' ? (settings?.max_transfer_pelajar || 500000) : (settings?.max_transfer_umum || 2000000);
+container.innerHTML = `
+<div class="max-w-2xl mx-auto">
+<div class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-xl mb-6">
+<p class="text-amber-100 mb-1">Saldo Anda</p>
+<h2 id="nasabah-transfer-balance" class="text-3xl font-bold">${formatRupiah(nasabah?.balance || 0)}</h2>
+<p class="mt-2 text-amber-100 text-sm">Maks. transfer per hari: ${formatRupiah(maxTransfer)}</p>
+</div>
+<div class="bg-white rounded-xl shadow-md p-6">
+<h3 class="text-lg font-bold text-gray-800 mb-6">Transfer ke Rekening Lain</h3>
+<div class="space-y-4">
+<div><label class="block text-sm font-medium text-gray-700 mb-2">No. Rekening Tujuan</label>
+<input type="text" id="tf-to" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Masukkan no. rekening tujuan" oninput="lookupTransferTarget()">
+<div id="tf-target-info" class="mt-2 text-sm text-gray-500"></div></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Transfer</label>
+<input type="text" id="tf-amount" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Rp 0" oninput="formatAmountInput(this)"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
+<input type="text" id="tf-desc" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Keterangan (opsional)"></div>
+<button id="btn-transfer" onclick="showPinModal()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all">Transfer</button>
+</div>
+</div>
+</div>`;
+};
+const lookupTransferTargetFunc = () => {
+const account = document.getElementById('tf-to')?.value?.trim() || '';
+const info = document.getElementById('tf-target-info');
+if (!info) return;
+if (account.length >= 10) {
+if (account === currentUser?.phone) {
+info.innerHTML = `<span class="text-red-500">✗ Tidak bisa transfer ke rekening sendiri</span>`;
+return;
+}
+const target = getUserByPhone(account);
+if (target && target.status === 'active' && target.role === 'nasabah') {
+info.innerHTML = `<span class="text-green-600">✓ ${target.name}</span>`;
+} else {
+info.innerHTML = `<span class="text-red-500">✗ Rekening tidak ditemukan</span>`;
+}
+} else {
+info.innerHTML = '';
+}
+};
+const lookupTransferTarget = debounce(lookupTransferTargetFunc, 300);
+const showPinModal = () => {
+const toAccount = document.getElementById('tf-to')?.value.trim();
+const amount = parseRupiah(document.getElementById('tf-amount')?.value);
+if (!toAccount) { showToast('Masukkan no. rekening tujuan', 'error'); return; }
+if (toAccount === currentUser?.phone) { showToast('Tidak bisa transfer ke rekening sendiri', 'error'); return; }
+const target = getUserByPhone(toAccount);
+if (!target || target.status !== 'active' || target.role !== 'nasabah') { showToast('Rekening tujuan tidak valid', 'error'); return; }
+if (!amount || amount <= 0) { showToast('Masukkan jumlah yang valid', 'error'); return; }
+if (amount > currentUser?.balance) { showToast('Saldo tidak mencukupi', 'error'); return; }
+const settings = getSettings();
+const maxTransfer = currentUser?.category === 'pelajar' ? (settings?.max_transfer_pelajar || 500000) : (settings?.max_transfer_umum || 2000000);
+const today = new Date().toDateString();
+const todayTransfers = getTransactions().filter(t =>
+t.transaction_type === 'transfer' && t.from_account === currentUser?.phone && new Date(t.created_at).toDateString() === today
+).reduce((sum, t) => sum + t.amount, 0);
+if (todayTransfers + amount > maxTransfer) {
+showToast(`Melebihi batas transfer harian (${formatRupiah(maxTransfer)})`, 'error'); return;
+}
+const content = `
+<div class="p-6 text-center">
+<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">${getIcon('key')}</div>
+<h3 class="text-xl font-bold text-gray-800 mb-2">Masukkan PIN</h3>
+<p class="text-gray-500 mb-6">Masukkan PIN 6 digit untuk konfirmasi transfer</p>
+<input type="password" id="pin-input" maxlength="6" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-center text-2xl tracking-widest focus:ring-2 focus:ring-amber-500" placeholder="• • • • • •" autocomplete="off">
+<div class="flex gap-3 mt-6">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50">Batal</button>
+<button id="btn-confirm-pin" onclick="handleTransfer()" class="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600">Konfirmasi</button>
+</div>
+</div>`;
+showModal(content, 'sm');
+setTimeout(() => {
+const pinInput = document.getElementById('pin-input');
+if (pinInput) {
+pinInput.focus();
+pinInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleTransfer(); });
+}
+}, 100);
+};
+const handleTransfer = async () => {
+const pin = document.getElementById('pin-input')?.value;
+const toAccount = document.getElementById('tf-to')?.value.trim();
+const amount = parseRupiah(document.getElementById('tf-amount')?.value);
+const desc = document.getElementById('tf-desc')?.value.trim();
+if (pin !== currentUser?.pin) {
+let user = allData.find(d => d.__backendId === currentUser.__backendId);
+const attempts = (user?.pin_attempts || 0) + 1;
+await window.dataSdk.update({ ...user, pin_attempts: attempts, blocked: attempts >= 3 });
+closeModal();
+if (attempts >= 3) {
+showBlockedModal();
+} else {
+showPinErrorModal(3 - attempts);
+}
+return;
+}
+if (!toAccount || toAccount === currentUser?.phone) {
+showToast('Rekening tujuan tidak valid', 'error'); return;
+}
+const target = getUserByPhone(toAccount);
+if (!target || target.status !== 'active' || target.role !== 'nasabah') {
+showToast('Rekening tujuan tidak valid', 'error'); return;
+}
+if (!amount || amount <= 0 || amount > currentUser?.balance) {
+showToast('Jumlah tidak valid atau saldo tidak mencukupi', 'error'); return;
+}
+const settings = getSettings();
+const maxTransfer = currentUser?.category === 'pelajar' ? (settings?.max_transfer_pelajar || 500000) : (settings?.max_transfer_umum || 2000000);
+const today = new Date().toDateString();
+const todayTransfers = getTransactions().filter(t =>
+t.transaction_type === 'transfer' && t.from_account === currentUser?.phone && new Date(t.created_at).toDateString() === today
+).reduce((sum, t) => sum + t.amount, 0);
+if (todayTransfers + amount > maxTransfer) {
+showToast(`Melebihi batas transfer harian (${formatRupiah(maxTransfer)})`, 'error'); return;
+}
+showLoading('btn-confirm-pin');
+try {
+const result = await window.dataSdk.atomicTransfer({
+fromAccount: currentUser.phone, toAccount: toAccount, amount: amount,
+description: desc || 'Transfer', senderName: currentUser.name, targetName: target.name,
+timestamp: new Date().toISOString()
+});
+hideLoading('btn-confirm-pin');
+closeModal();
+if (result.isOk) {
+const sender = allData.find(d => d.__backendId === currentUser.__backendId);
+if (sender && sender.pin_attempts > 0) {
+await window.dataSdk.update({ ...sender, pin_attempts: 0 });
+}
+const now = new Date();
+showSuccessModal('Transfer Berhasil!', `
+<div class="space-y-2">
+<p><span class="text-gray-500">Tanggal:</span> ${now.toLocaleDateString('id-ID')}</p>
+<p><span class="text-gray-500">Jam:</span> ${now.toLocaleTimeString('id-ID')}</p>
+<p><span class="text-gray-500">Jumlah:</span> <strong class="text-amber-600">${formatRupiah(amount)}</strong></p>
+<p><span class="text-gray-500">Sumber Dana:</span> ${currentUser.name} (${currentUser.phone})</p>
+<p><span class="text-gray-500">Tujuan:</span> ${target.name} (${toAccount})</p>
+<p><span class="text-gray-500">Keterangan:</span> ${desc || '-'}</p>
+</div>`);
+['tf-to', 'tf-amount', 'tf-desc', 'tf-target-info'].forEach(id => {
+const el = document.getElementById(id);
+if (el) { if (id === 'tf-target-info') el.innerHTML = ''; else el.value = ''; }
+});
+} else {
+showToast(result.error || 'Gagal melakukan transfer', 'error');
+}
+} catch (error) {
+hideLoading('btn-confirm-pin');
+closeModal();
+console.error('Transfer error:', error);
+showToast('Terjadi kesalahan sistem. Silakan coba lagi.', 'error');
+}
+};
+
+// ==================== HISTORY ====================
+const renderHistory = (container) => {
+const role = currentUser?.role;
+let transactions = getTransactions();
+if (role === 'nasabah') {
+transactions = transactions.filter(t => t.from_account === currentUser.phone || t.to_account === currentUser.phone);
+}
+transactions = transactions.reverse();
+const isStaff = ['direktur', 'admin', 'teller', 'cs'].includes(role);
+const isDirektur = role === 'direktur';
+container.innerHTML = `
+<div class="bg-white rounded-xl shadow-md p-6">
+<div class="flex flex-col gap-4 mb-6">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<h3 class="text-lg font-bold text-gray-800">Riwayat Transaksi</h3>
+<div class="flex gap-2">
+<button onclick="showPrintHistoryModal()" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-all flex items-center justify-center gap-2">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+Cetak Riwayat
+</button>
+${isDirektur ? `
+<button onclick="showDeleteHistoryModal()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all flex items-center justify-center gap-2">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+Hapus Riwayat
+</button>` : ''}
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+${isStaff ? `<input type="text" id="filter-nasabah-name" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="Cari nama nasabah...">` : ''}
+<input type="date" id="filter-from" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="Dari tanggal">
+<input type="date" id="filter-to" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="Sampai tanggal">
+<div class="flex gap-2">
+<button onclick="filterHistory()" class="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600">Filter</button>
+<button onclick="resetHistoryFilter()" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">Reset</button>
+</div>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full">
+<thead><tr class="text-left text-gray-500 text-sm border-b">
+<th class="pb-3">Tanggal</th><th class="pb-3">Jenis</th><th class="pb-3">Dari</th><th class="pb-3">Ke</th><th class="pb-3">Jumlah</th><th class="pb-3">Keterangan</th>
+${isStaff ? '<th class="pb-3">Aksi</th>' : ''}
+</tr></thead>
+<tbody id="history-table-body">${renderHistoryRows(transactions, isStaff)}</tbody>
+</table>
+</div>
+</div>`;
+};
+const renderHistoryRows = (transactions, isStaff = false) => {
+return transactions.map(t => `
+<tr class="border-b border-gray-100 hover:bg-gray-50">
+<td class="py-3 text-sm">${formatDateTime(t.created_at)}</td>
+<td class="py-3"><span class="px-2 py-1 rounded-full text-xs ${t.transaction_type === 'setor' ? 'bg-green-100 text-green-600' : t.transaction_type === 'tarik' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${t.transaction_type}</span></td>
+<td class="py-3 text-sm">${t.from_name || '-'}<br><span class="text-gray-400">${t.from_account || ''}</span></td>
+<td class="py-3 text-sm">${t.to_name || '-'}<br><span class="text-gray-400">${t.to_account || ''}</span></td>
+<td class="py-3 font-medium">${formatRupiah(t.amount)}</td>
+<td class="py-3 text-sm text-gray-500">${t.description || '-'}</td>
+${isStaff ? `
+<td class="py-3">
+${t.from_account && t.from_account !== '-' ? `<button onclick="printFromHistory('${t.from_account}')" class="px-3 py-1 bg-purple-100 text-purple-600 rounded-lg text-sm hover:bg-purple-200">Cetak</button>` :
+t.to_account && t.to_account !== '-' ? `<button onclick="printFromHistory('${t.to_account}')" class="px-3 py-1 bg-purple-100 text-purple-600 rounded-lg text-sm hover:bg-purple-200">Cetak</button>` : '-'}
+</td>` : ''}
+</tr>`).join('') || `<tr><td colspan="${isStaff ? '7' : '6'}" class="py-8 text-center text-gray-400">Tidak ada transaksi</td></tr>`;
+};
+const filterHistory = debounce(() => {
+const fromDate = document.getElementById('filter-from')?.value;
+const toDate = document.getElementById('filter-to')?.value;
+const nasabahName = document.getElementById('filter-nasabah-name')?.value?.toLowerCase() || '';
+let transactions = getTransactions();
+if (currentUser?.role === 'nasabah') {
+transactions = transactions.filter(t => t.from_account === currentUser.phone || t.to_account === currentUser.phone);
+}
+if (nasabahName) {
+transactions = transactions.filter(t =>
+(t.from_name && t.from_name.toLowerCase().includes(nasabahName)) ||
+(t.to_name && t.to_name.toLowerCase().includes(nasabahName)) ||
+(t.from_account && t.from_account.includes(nasabahName)) ||
+(t.to_account && t.to_account.includes(nasabahName))
+);
+}
+if (fromDate) transactions = transactions.filter(t => new Date(t.created_at) >= new Date(fromDate));
+if (toDate) {
+const to = new Date(toDate); to.setHours(23, 59, 59);
+transactions = transactions.filter(t => new Date(t.created_at) <= to);
+}
+const isStaff = ['direktur', 'admin', 'teller', 'cs'].includes(currentUser?.role);
+const targetBody = document.getElementById('history-table-body');
+if (targetBody) targetBody.innerHTML = renderHistoryRows(transactions.reverse(), isStaff);
+}, 300);
+const resetHistoryFilter = () => {
+['filter-from', 'filter-to', 'filter-nasabah-name'].forEach(id => {
+const el = document.getElementById(id);
+if (el) el.value = '';
+});
+renderHistory(document.getElementById('main-content'));
+};
+const printFromHistory = (accountNumber) => {
+const nasabah = getUserByPhone(accountNumber);
+if (!nasabah) { showToast('Nasabah tidak ditemukan', 'error'); return; }
+showPrintRekening(nasabah.__backendId);
+};
+
+// ==================== SETTINGS ====================
+const renderSettings = (container) => {
+const settings = getSettings();
+const maxUmum = settings?.max_transfer_umum || 2000000;
+const maxPelajar = settings?.max_transfer_pelajar || 500000;
+container.innerHTML = `
+<div class="max-w-2xl mx-auto">
+<div class="bg-white rounded-xl shadow-md p-6">
+<h3 class="text-lg font-bold text-gray-800 mb-6">Pengaturan Transfer</h3>
+<div class="space-y-4">
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Maks. Transfer Harian (Nasabah Umum)</label>
+<input type="text" id="max-umum" value="${formatRupiah(maxUmum)}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" oninput="formatAmountInput(this)"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Maks. Transfer Harian (Nasabah Pelajar)</label>
+<input type="text" id="max-pelajar" value="${formatRupiah(maxPelajar)}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" oninput="formatAmountInput(this)"></div>
+<button id="btn-save-settings" onclick="saveSettings()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all">Simpan Pengaturan</button>
+</div>
+</div>
+</div>`;
+};
+const saveSettings = async () => {
+const maxUmum = parseRupiah(document.getElementById('max-umum')?.value);
+const maxPelajar = parseRupiah(document.getElementById('max-pelajar')?.value);
+showLoading('btn-save-settings');
+let settings = getSettings();
+if (settings) {
+await window.dataSdk.update({ ...settings, max_transfer_umum: maxUmum, max_transfer_pelajar: maxPelajar });
+} else {
+await window.dataSdk.create({ type: 'settings', max_transfer_umum: maxUmum, max_transfer_pelajar: maxPelajar });
+}
+hideLoading('btn-save-settings');
+showToast('Pengaturan berhasil disimpan', 'success');
+};
+
+// ==================== CHANGE PASSWORD ====================
+const renderChangePassword = (container) => {
+const isNasabah = currentUser?.role === 'nasabah';
+const isTeller = currentUser?.role === 'teller';
+const canChangePin = isNasabah || isTeller;
+container.innerHTML = `
+<div class="max-w-md mx-auto">
+<div class="bg-white rounded-xl shadow-md p-6">
+<h3 class="text-lg font-bold text-gray-800 mb-6">Ubah Password${isNasabah ? ' & PIN' : ''}</h3>
+<div class="space-y-4">
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Password Lama</label>
+<input type="password" id="old-password" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Masukkan password lama"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Password Baru</label>
+<input type="password" id="new-password" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Masukkan password baru"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password Baru</label>
+<input type="password" id="confirm-password" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Konfirmasi password baru"></div>
+<button id="btn-change-pwd" onclick="handleChangePassword()" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all">Ubah Password</button>
+${canChangePin ? `
+<hr class="my-6">
+<h4 class="font-bold text-gray-700 mb-4">Ubah PIN</h4>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">PIN Lama</label>
+<input type="password" id="old-pin" maxlength="6" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Masukkan PIN lama"></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">PIN Baru (6 digit)</label>
+<input type="password" id="new-pin" maxlength="6" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500" placeholder="Masukkan PIN baru"></div>
+<button id="btn-change-pin" onclick="handleChangePin()" class="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all">Ubah PIN</button>` : ''}
+</div>
+</div>
+</div>`;
+};
+const handleChangePassword = async () => {
+const oldPwd = document.getElementById('old-password')?.value;
+const newPwd = document.getElementById('new-password')?.value;
+const confirmPwd = document.getElementById('confirm-password')?.value;
+if (oldPwd !== currentUser?.password) { showToast('Password lama salah', 'error'); return; }
+if (newPwd !== confirmPwd) { showToast('Konfirmasi password tidak cocok', 'error'); return; }
+if (newPwd.length < 6) { showToast('Password minimal 6 karakter', 'error'); return; }
+showLoading('btn-change-pwd');
+const user = allData.find(d => d.__backendId === currentUser.__backendId);
+const result = await window.dataSdk.update({ ...user, password: newPwd });
+hideLoading('btn-change-pwd');
+if (result.isOk) {
+currentUser = { ...currentUser, password: newPwd };
+showToast('Password berhasil diubah', 'success');
+['old-password', 'new-password', 'confirm-password'].forEach(id => {
+const el = document.getElementById(id); if (el) el.value = '';
+});
+} else {
+showToast(result.error || 'Gagal mengubah password', 'error');
+}
+};
+const handleChangePin = async () => {
+const oldPin = document.getElementById('old-pin')?.value;
+const newPin = document.getElementById('new-pin')?.value;
+if (oldPin !== currentUser?.pin) { showToast('PIN lama salah', 'error'); return; }
+if (!/^\d{6}$/.test(newPin)) { showToast('PIN harus 6 digit angka', 'error'); return; }
+showLoading('btn-change-pin');
+const user = allData.find(d => d.__backendId === currentUser.__backendId);
+const result = await window.dataSdk.update({ ...user, pin: newPin });
+hideLoading('btn-change-pin');
+if (result.isOk) {
+currentUser = { ...currentUser, pin: newPin };
+showToast('PIN berhasil diubah', 'success');
+['old-pin', 'new-pin'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+} else {
+showToast(result.error || 'Gagal mengubah PIN', 'error');
+}
+};
+
+// ==================== PESAN & NOTIFIKASI ====================
+const showBroadcastModal = () => {
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-2">Kirim Pengumuman (Broadcast)</h3>
+<p class="text-gray-500 mb-6">Kirim notifikasi ke banyak nasabah sekaligus</p>
+<div class="space-y-4">
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Pilih Penerima</label>
+<select id="broadcast-target" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500">
+<option value="all">Semua Nasabah</option><option value="umum">Nasabah Umum</option><option value="pelajar">Nasabah Pelajar</option>
+</select></div>
+<div><label class="block text-sm font-medium text-gray-700 mb-2">Pesan Pengumuman</label>
+<textarea id="broadcast-msg" rows="4" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" placeholder="Tulis pengumuman di sini..."></textarea></div>
+</div>
+<div class="flex gap-3 mt-6">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">Batal</button>
+<button id="btn-send-broadcast" onclick="handleBroadcastMessage()" class="flex-1 px-4 py-3 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-all">Kirim Broadcast</button>
+</div>
+</div>`;
+showModal(content);
+};
+const handleBroadcastMessage = async () => {
+const target = document.getElementById('broadcast-target')?.value;
+const msg = document.getElementById('broadcast-msg')?.value.trim();
+if (!msg) { showToast('Pesan tidak boleh kosong', 'error'); return; }
+let recipients = getUsersByRole('nasabah').filter(n => n.status === 'active');
+if (target === 'umum') recipients = recipients.filter(n => n.category === 'umum');
+if (target === 'pelajar') recipients = recipients.filter(n => n.category === 'pelajar');
+if (recipients.length === 0) { showToast('Tidak ada nasabah dalam kategori ini', 'error'); return; }
+showLoading('btn-send-broadcast');
+const payloads = recipients.map(n => ({
+type: 'notification', to_account: n.phone, message: msg, read: false,
+created_at: new Date().toISOString(), sender: currentUser?.name || 'Admin'
+}));
+const result = await window.dataSdk.createBatch(payloads);
+hideLoading('btn-send-broadcast');
+if (result.isOk) {
+closeModal();
+showToast(`Pengumuman terkirim ke ${recipients.length} nasabah`, 'success');
+} else {
+showToast(result.error || 'Gagal mengirim pengumuman', 'error');
+}
+};
+const showSendMessageModal = (nasabahId) => {
+const nasabah = allData.find(d => d.__backendId === nasabahId);
+if (!nasabah) return;
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-2">Kirim Notifikasi</h3>
+<p class="text-gray-500 mb-6">Pesan untuk: <strong>${nasabah.name}</strong></p>
+<textarea id="msg-content" rows="4" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500" placeholder="Tulis notifikasi Anda di sini..."></textarea>
+<div class="flex gap-3 mt-6">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">Batal</button>
+<button id="btn-send-msg" onclick="handleSendMessage('${nasabahId}')" class="flex-1 px-4 py-3 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-all">Kirim</button>
+</div>
+</div>`;
+showModal(content);
+};
+const handleSendMessage = async (nasabahId) => {
+const nasabah = allData.find(d => d.__backendId === nasabahId);
+const msg = document.getElementById('msg-content')?.value.trim();
+if (!msg) { showToast('Pesan tidak boleh kosong', 'error'); return; }
+showLoading('btn-send-msg');
+const result = await window.dataSdk.create({
+type: 'notification', to_account: nasabah.phone, message: msg, read: false,
+created_at: new Date().toISOString(), sender: currentUser?.name || 'Admin'
+});
+hideLoading('btn-send-msg');
+if (result.isOk) {
+closeModal();
+showToast('Notifikasi berhasil dikirim', 'success');
+} else {
+showToast(result.error || 'Gagal mengirim notifikasi', 'error');
+}
+};
+const showNasabahNotifications = async () => {
+const msgs = allData.filter(d => d.type === 'notification' && d.to_account === currentUser?.phone)
+.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-6">Notifikasi Anda</h3>
+<div class="max-h-[60vh] overflow-y-auto space-y-3 pr-2 scrollbar-thin">
+${msgs.map(m => `
+<div class="p-4 rounded-xl border ${m.read ? 'bg-white border-gray-100' : 'bg-indigo-50 border-indigo-100'}">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-semibold ${m.read ? 'text-gray-500' : 'text-indigo-600'}">${m.sender || 'Admin BSS'}</span>
+<span class="text-[10px] text-gray-400">${formatDateTime(m.created_at)}</span>
+</div>
+<p class="text-sm text-gray-700 whitespace-pre-wrap">${m.message}</p>
+</div>`).join('') || '<p class="text-center text-gray-400 py-8">Belum ada notifikasi</p>'}
+</div>
+<div class="mt-6 flex justify-end"><button onclick="closeModal()" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200">Tutup</button></div>
+</div>`;
+showModal(content, 'md');
+const unreadMsgs = msgs.filter(m => !m.read);
+for (let msg of unreadMsgs) {
+await window.dataSdk.update({ ...msg, read: true });
+}
+};
+const showNotifications = () => {
+const pending = getPendingNasabah();
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-6">Nasabah Menunggu Konfirmasi</h3>
+<div class="max-h-96 overflow-y-auto space-y-3">
+${pending.map(n => `
+<div class="bg-gray-50 rounded-xl p-4 flex items-center justify-between">
+<div>
+<p class="font-medium text-gray-800">${n.name}</p>
+<p class="text-gray-500 text-sm">${n.phone} • ${n.category === 'pelajar' ? 'Pelajar' : 'Umum'}</p>
+<p class="text-gray-400 text-xs">${formatDateTime(n.created_at)}</p>
+</div>
+<div class="flex gap-2">
+<button onclick="approveNasabah('${n.__backendId}')" class="px-3 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600">Setujui</button>
+<button onclick="rejectNasabah('${n.__backendId}')" class="px-3 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600">Tolak</button>
+</div>
+</div>`).join('') || '<p class="text-center text-gray-400 py-8">Tidak ada pendaftaran baru</p>'}
+</div>
+<div class="mt-6 flex justify-end"><button onclick="closeModal()" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200">Tutup</button></div>
+</div>`;
+showModal(content, 'lg');
+};
+const approveNasabah = async (nasabahId) => {
+const nasabah = allData.find(d => d.__backendId === nasabahId);
+if (!nasabah) return;
+const result = await window.dataSdk.update({ ...nasabah, status: 'active' });
+if (result.isOk) {
+showToast(`${nasabah.name} berhasil diaktifkan`, 'success');
+closeModal();
+}
+};
+const rejectNasabah = async (nasabahId) => {
+const nasabah = allData.find(d => d.__backendId === nasabahId);
+if (!nasabah) return;
+const result = await window.dataSdk.delete(nasabah);
+if (result.isOk) {
+showToast(`Pendaftaran ${nasabah.name} ditolak`, 'success');
+closeModal();
+}
+};
+
+// ==================== USER LIST MODAL ====================
+const showUserList = (role) => {
+const users = role === 'nasabah' ? getUsersByRole(role).filter(u => u.status === 'active') : getUsersByRole(role);
+const roleLabel = { admin: 'Admin', teller: 'Teller', cs: 'Customer Service', nasabah: 'Nasabah' }[role];
+const canSeeSaldo = ['direktur', 'admin'].includes(currentUser?.role) && role === 'nasabah';
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-6">Daftar ${roleLabel}</h3>
+<div class="max-h-96 overflow-y-auto">
+<table class="w-full">
+<thead class="sticky top-0 bg-white"><tr class="text-left text-gray-500 text-sm border-b">
+<th class="pb-3">Nama</th><th class="pb-3">${role === 'nasabah' ? 'No. Rekening' : 'Username'}</th>
+${canSeeSaldo ? '<th class="pb-3">Saldo</th>' : ''}
+</tr></thead>
+<tbody>
+${users.map(u => `
+<tr class="border-b border-gray-100">
+<td class="py-3">${u.name}</td>
+<td class="py-3 text-gray-500">${role === 'nasabah' ? u.phone : u.username}</td>
+${canSeeSaldo ? `<td class="py-3 font-medium">${formatRupiah(u.balance)}</td>` : ''}
+</tr>`).join('') || `<tr><td colspan="${canSeeSaldo ? 3 : 2}" class="py-8 text-center text-gray-400">Tidak ada data</td></tr>`}
+</tbody>
+</table>
+</div>
+<div class="mt-6 flex justify-end"><button onclick="closeModal()" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200">Tutup</button></div>
+</div>`;
+showModal(content, 'lg');
+};
+
+// ==================== PRINT REKENING KORAN ====================
+const showPrintRekening = (nasabahId) => {
+const nasabah = allData.find(d => d.__backendId === nasabahId);
+if (!nasabah) return;
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-6">Cetak Rekening Koran</h3>
+<div class="bg-gray-50 rounded-xl p-4 mb-6">
+<div class="grid grid-cols-2 gap-4 text-sm">
+<div><p class="text-gray-500">Nama</p><p class="font-medium">${nasabah.name}</p></div>
+<div><p class="text-gray-500">No. Rekening</p><p class="font-medium">${nasabah.phone}</p></div>
+</div>
+</div>
+<div class="mb-6">
+<label class="block text-sm font-medium text-gray-700 mb-3">Filter Periode Transaksi</label>
+<div class="grid grid-cols-2 gap-4">
+<div><label class="block text-xs text-gray-500 mb-1">Dari Tanggal</label>
+<input type="date" id="print-from-date" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500"></div>
+<div><label class="block text-xs text-gray-500 mb-1">Sampai Tanggal</label>
+<input type="date" id="print-to-date" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500"></div>
+</div>
+</div>
+<div class="flex justify-end gap-3">
+<button onclick="closeModal()" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200">Batal</button>
+<button onclick="generateRekeningKoran('${nasabahId}')" class="px-6 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600">Lihat & Cetak</button>
+</div>
+</div>`;
+showModal(content, 'md');
+};
+const generateRekeningKoran = (nasabahId) => {
+const nasabah = allData.find(d => d.__backendId === nasabahId);
+if (!nasabah) return;
+const fromDate = document.getElementById('print-from-date')?.value;
+const toDate = document.getElementById('print-to-date')?.value;
+let transactions = getTransactions().filter(t => t.from_account === nasabah.phone || t.to_account === nasabah.phone);
+if (fromDate) transactions = transactions.filter(t => new Date(t.created_at) >= new Date(fromDate));
+if (toDate) { const to = new Date(toDate); to.setHours(23, 59, 59); transactions = transactions.filter(t => new Date(t.created_at) <= to); }
+transactions = transactions.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+let totalDebit = 0, totalKredit = 0;
+transactions.forEach(t => { if (t.from_account === nasabah.phone) totalDebit += t.amount; else totalKredit += t.amount; });
+const periodeText = fromDate && toDate ? `${new Date(fromDate).toLocaleDateString('id-ID')} s/d ${new Date(toDate).toLocaleDateString('id-ID')}` :
+fromDate ? `Sejak ${new Date(fromDate).toLocaleDateString('id-ID')}` : toDate ? `Sampai ${new Date(toDate).toLocaleDateString('id-ID')}` : 'Semua Transaksi';
+const content = `
+<div class="p-6 bg-white" id="print-area">
+<div class="text-center mb-6 border-b pb-4">
+<h2 class="text-2xl font-bold mt-4">${config.app_title}</h2><p class="text-gray-500">${config.school_name}</p>
+</div>
+<div class="mb-6">
+<h3 class="font-bold text-lg mb-3">REKENING KORAN</h3>
+<div class="grid grid-cols-2 gap-2 text-sm">
+<p><span class="text-gray-500">Nama:</span> ${nasabah.name}</p><p><span class="text-gray-500">No. Rekening:</span> ${nasabah.phone}</p>
+<p><span class="text-gray-500">Kategori:</span> ${nasabah.category === 'pelajar' ? 'Pelajar' : 'Umum'}</p><p><span class="text-gray-500">Tanggal Cetak:</span> ${new Date().toLocaleDateString('id-ID')}</p>
+<p class="col-span-2"><span class="text-gray-500">Periode:</span> <strong>${periodeText}</strong></p>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-sm border">
+<thead><tr class="bg-gray-100 text-left">
+<th class="p-2 border">Tanggal</th><th class="p-2 border">Jenis</th><th class="p-2 border">Dari</th><th class="p-2 border">Ke</th><th class="p-2 border">Keterangan</th><th class="p-2 border text-right">Debit</th><th class="p-2 border text-right">Kredit</th>
+</tr></thead>
+<tbody>
+${transactions.map(t => {
+const isDebit = t.from_account === nasabah.phone;
+return `<tr class="border-b">
+<td class="p-2 border">${formatDateTime(t.created_at)}</td><td class="p-2 border">${t.transaction_type}</td>
+<td class="p-2 border">${t.from_name || '-'}<br><span class="text-xs text-gray-500">${t.from_account || ''}</span></td>
+<td class="p-2 border">${t.to_name || '-'}<br><span class="text-xs text-gray-500">${t.to_account || ''}</span></td>
+<td class="p-2 border">${t.description || '-'}</td>
+<td class="p-2 border text-right text-red-600">${isDebit ? formatRupiah(t.amount) : '-'}</td>
+<td class="p-2 border text-right text-green-600">${!isDebit ? formatRupiah(t.amount) : '-'}</td>
+</tr>`;
+}).join('') || '<tr><td colspan="7" class="p-4 text-center text-gray-400">Tidak ada transaksi pada periode ini</td></tr>'}
+<tr class="bg-gray-50 font-bold">
+<td colspan="5" class="p-2 border text-right">TOTAL:</td>
+<td class="p-2 border text-right text-red-600">${formatRupiah(totalDebit)}</td>
+<td class="p-2 border text-right text-green-600">${formatRupiah(totalKredit)}</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="mt-4 text-right">
+<p class="text-sm text-gray-500">Mutasi: ${formatRupiah(totalKredit - totalDebit)}</p>
+<p class="font-bold text-lg">Saldo Akhir: ${formatRupiah(nasabah.balance)}</p>
+</div>
+<div class="mt-12 flex justify-end">
+<div class="text-center w-48">
+<p class="text-sm text-gray-700 mb-10">Kerinci, ${new Date().toLocaleDateString('id-ID')}<br>Petugas Pencetak,</p>
+<p class="font-bold text-gray-800 underline">${currentUser?.name || 'Petugas'}</p>
+<p class="text-xs text-gray-500 capitalize">${currentUser?.role || 'Staff'}</p>
+</div>
+</div>
+<div class="mt-6 flex justify-end gap-3 print-hide">
+<button onclick="closeModal()" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200">Tutup</button>
+<button onclick="window.print()" class="px-6 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600">Cetak</button>
+</div>
+</div>`;
+showModal(content, '4xl');
+};
+
+// ==================== DELETE HISTORY ====================
+const showDeleteHistoryModal = () => {
+const content = `
+<div class="p-6">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center"><svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>
+<div><h3 class="text-xl font-bold text-gray-800">Hapus Riwayat Transaksi</h3><p class="text-sm text-gray-500">Hapus riwayat tanpa mengubah saldo nasabah</p></div>
+</div>
+<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+<div class="flex gap-3">
+<svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+<div class="text-sm text-amber-800">
+<p class="font-medium mb-1">Perhatian:</p>
+<ul class="list-disc list-inside space-y-1">
+<li>Riwayat transaksi akan dihapus permanen</li>
+<li>Saldo nasabah TIDAK akan berubah</li>
+<li>Data yang sudah dihapus tidak dapat dikembalikan</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="mb-6">
+<label class="block text-sm font-medium text-gray-700 mb-3">Pilih Periode yang akan Dihapus</label>
+<div class="grid grid-cols-2 gap-4">
+<div><label class="block text-xs text-gray-500 mb-1">Dari Tanggal</label>
+<input type="date" id="delete-from-date" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500"></div>
+<div><label class="block text-xs text-gray-500 mb-1">Sampai Tanggal</label>
+<input type="date" id="delete-to-date" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500"></div>
+</div>
+<p class="text-xs text-gray-500 mt-2">* Kosongkan untuk menghapus semua riwayat</p>
+</div>
+<div class="flex gap-3">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">Batal</button>
+<button id="btn-preview-delete" onclick="previewDeleteHistory()" class="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-all">Lihat Preview</button>
+</div>
+</div>`;
+showModal(content, 'lg');
+};
+const previewDeleteHistory = () => {
+const fromDate = document.getElementById('delete-from-date')?.value;
+const toDate = document.getElementById('delete-to-date')?.value;
+let transactions = getTransactions();
+if (fromDate) transactions = transactions.filter(t => new Date(t.created_at) >= new Date(fromDate));
+if (toDate) { const to = new Date(toDate); to.setHours(23, 59, 59); transactions = transactions.filter(t => new Date(t.created_at) <= to); }
+if (transactions.length === 0) { showToast('Tidak ada transaksi pada periode tersebut', 'warning'); return; }
+const periodeText = fromDate && toDate ? `${new Date(fromDate).toLocaleDateString('id-ID')} s/d ${new Date(toDate).toLocaleDateString('id-ID')}` :
+fromDate ? `Sejak ${new Date(fromDate).toLocaleDateString('id-ID')}` : toDate ? `Sampai ${new Date(toDate).toLocaleDateString('id-ID')}` : 'Semua Riwayat Transaksi';
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-4">Preview Penghapusan</h3>
+<div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+<div class="flex items-start gap-3">
+<svg class="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+<div><p class="font-bold text-red-800 mb-1">Akan Menghapus ${transactions.length} Transaksi</p><p class="text-sm text-red-700">Periode: <strong>${periodeText}</strong></p></div>
+</div>
+</div>
+<div class="max-h-64 overflow-y-auto mb-6 border rounded-xl">
+<table class="w-full text-sm">
+<thead class="sticky top-0 bg-gray-100"><tr class="text-left"><th class="p-2 border-b">Tanggal</th><th class="p-2 border-b">Jenis</th><th class="p-2 border-b">Dari/Ke</th><th class="p-2 border-b">Jumlah</th></tr></thead>
+<tbody>
+${transactions.slice(0, 20).map(t => `
+<tr class="border-b border-gray-100">
+<td class="p-2">${formatDateTime(t.created_at)}</td>
+<td class="p-2"><span class="px-2 py-1 rounded-full text-xs ${t.transaction_type === 'setor' ? 'bg-green-100 text-green-600' : t.transaction_type === 'tarik' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${t.transaction_type}</span></td>
+<td class="p-2 text-xs">${t.from_name || '-'} → ${t.to_name || '-'}</td>
+<td class="p-2 font-medium">${formatRupiah(t.amount)}</td>
+</tr>`).join('')}
+${transactions.length > 20 ? `<tr><td colspan="4" class="p-3 text-center text-gray-500 text-xs">... dan ${transactions.length - 20} transaksi lainnya</td></tr>` : ''}
+</tbody>
+</table>
+</div>
+<div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6">
+<p class="text-sm text-amber-800 text-center"><strong>Konfirmasi:</strong> Saldo semua nasabah akan tetap sama setelah penghapusan</p>
+</div>
+<div class="flex gap-3">
+<button onclick="closeModal()" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all">Batal</button>
+<button id="btn-confirm-delete" onclick="confirmDeleteHistory('${fromDate}', '${toDate}')" class="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all">Hapus ${transactions.length} Transaksi</button>
+</div>
+</div>`;
+showModal(content, 'xl');
+};
+const confirmDeleteHistory = async (fromDate, toDate) => {
+let transactions = getTransactions();
+if (fromDate) transactions = transactions.filter(t => new Date(t.created_at) >= new Date(fromDate));
+if (toDate) { const to = new Date(toDate); to.setHours(23, 59, 59); transactions = transactions.filter(t => new Date(t.created_at) <= to); }
+if (transactions.length === 0) return;
+showLoading('btn-confirm-delete');
+let deletedCount = 0;
+for (let i = 0; i < transactions.length; i += BATCH_SIZE) {
+const batch = transactions.slice(i, i + BATCH_SIZE);
+for (const transaction of batch) {
+const result = await window.dataSdk.delete(transaction);
+if (result.isOk) deletedCount++;
+}
+}
+hideLoading('btn-confirm-delete');
+closeModal();
+if (deletedCount > 0) {
+showSuccessModal('Riwayat Berhasil Dihapus!', `
+<div class="space-y-2">
+<p><span class="text-gray-500">Jumlah transaksi dihapus:</span> <strong>${deletedCount}</strong></p>
+<div class="mt-4 p-3 bg-green-50 rounded-lg"><p class="text-green-700 text-sm">✓ Saldo semua nasabah tetap sama</p></div>
+</div>`);
+renderHistory(document.getElementById('main-content'));
+} else {
+showToast('Gagal menghapus riwayat transaksi', 'error');
+}
+};
+
+// ==================== PRINT HISTORY ====================
+const showPrintHistoryModal = () => {
+const content = `
+<div class="p-6">
+<h3 class="text-xl font-bold text-gray-800 mb-6">Cetak Riwayat Transaksi</h3>
+<div class="mb-6">
+<label class="block text-sm font-medium text-gray-700 mb-3">Filter Periode Transaksi</label>
+<div class="grid grid-cols-2 gap-4">
+<div><label class="block text-xs text-gray-500 mb-1">Dari Tanggal</label>
+<input type="date" id="print-history-from" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500"></div>
+<div><label class="block text-xs text-gray-500 mb-1">Sampai Tanggal</label>
+<input type="date" id="print-history-to" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500"></div>
+</div>
+</div>
+${['direktur', 'admin', 'teller', 'cs'].includes(currentUser?.role) ? `
+<div class="mb-6">
+<label class="block text-sm font-medium text-gray-700 mb-2">Filter Nasabah (opsional)</label>
+<input type="text" id="print-history-nasabah" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="Nama nasabah atau no. rekening">
+</div>` : ''}
+<div class="flex justify-end gap-3">
+<button onclick="closeModal()" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200">Batal</button>
+<button onclick="generatePrintHistory()" class="px-6 py-2 bg-purple-500 text-white rounded-xl hover:bg-purple-600">Lihat & Cetak</button>
+</div>
+</div>`;
+showModal(content, 'md');
+};
+const generatePrintHistory = () => {
+const fromDate = document.getElementById('print-history-from')?.value;
+const toDate = document.getElementById('print-history-to')?.value;
+const nasabahFilter = document.getElementById('print-history-nasabah')?.value?.toLowerCase() || '';
+const role = currentUser?.role;
+let transactions = getTransactions();
+if (role === 'nasabah') {
+transactions = transactions.filter(t => t.from_account === currentUser.phone || t.to_account === currentUser.phone);
+}
+if (nasabahFilter) {
+transactions = transactions.filter(t =>
+(t.from_name && t.from_name.toLowerCase().includes(nasabahFilter)) ||
+(t.to_name && t.to_name.toLowerCase().includes(nasabahFilter)) ||
+(t.from_account && t.from_account.includes(nasabahFilter)) ||
+(t.to_account && t.to_account.includes(nasabahFilter))
+);
+}
+if (fromDate) transactions = transactions.filter(t => new Date(t.created_at) >= new Date(fromDate));
+if (toDate) { const to = new Date(toDate); to.setHours(23, 59, 59); transactions = transactions.filter(t => new Date(t.created_at) <= to); }
+transactions = transactions.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+const totalSetor = transactions.filter(t => t.transaction_type === 'setor').reduce((sum, t) => sum + t.amount, 0);
+const totalTarik = transactions.filter(t => t.transaction_type === 'tarik').reduce((sum, t) => sum + t.amount, 0);
+const totalTransfer = transactions.filter(t => t.transaction_type === 'transfer').reduce((sum, t) => sum + t.amount, 0);
+const periodeText = fromDate && toDate ? `${new Date(fromDate).toLocaleDateString('id-ID')} s/d ${new Date(toDate).toLocaleDateString('id-ID')}` :
+fromDate ? `Sejak ${new Date(fromDate).toLocaleDateString('id-ID')}` : toDate ? `Sampai ${new Date(toDate).toLocaleDateString('id-ID')}` : 'Semua Transaksi';
+const nasabahText = nasabahFilter ? `Nasabah: ${nasabahFilter}` : 'Semua Nasabah';
+const content = `
+<div class="p-6 bg-white" id="print-area">
+<div class="text-center mb-6 border-b pb-4">
+<h2 class="text-2xl font-bold mt-4">${config.app_title}</h2><p class="text-gray-500">${config.school_name}</p>
+</div>
+<div class="mb-6">
+<h3 class="font-bold text-lg mb-3">LAPORAN RIWAYAT TRANSAKSI</h3>
+<div class="grid grid-cols-2 gap-2 text-sm bg-gray-50 rounded-xl p-4">
+<p><span class="text-gray-500">Tanggal Cetak:</span> ${new Date().toLocaleDateString('id-ID')}</p>
+<p><span class="text-gray-500">Waktu:</span> ${new Date().toLocaleTimeString('id-ID')}</p>
+<p class="col-span-2"><span class="text-gray-500">Periode:</span> <strong>${periodeText}</strong></p>
+${nasabahFilter ? `<p class="col-span-2"><span class="text-gray-500">${nasabahText}</span></p>` : ''}
+<p><span class="text-gray-500">Dicetak oleh:</span> ${currentUser?.name}</p>
+<p><span class="text-gray-500">Total Transaksi:</span> <strong>${transactions.length}</strong></p>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-sm border">
+<thead><tr class="bg-gray-100 text-left">
+<th class="p-2 border">No</th><th class="p-2 border">Tanggal & Waktu</th><th class="p-2 border">Jenis</th><th class="p-2 border">Dari</th><th class="p-2 border">Ke</th><th class="p-2 border text-right">Jumlah</th><th class="p-2 border">Keterangan</th>
+</tr></thead>
+<tbody>
+${transactions.map((t, idx) => `
+<tr class="border-b">
+<td class="p-2 border text-center">${idx + 1}</td>
+<td class="p-2 border">${formatDateTime(t.created_at)}</td>
+<td class="p-2 border"><span class="px-2 py-1 rounded-full text-xs ${t.transaction_type === 'setor' ? 'bg-green-100 text-green-600' : t.transaction_type === 'tarik' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}">${t.transaction_type}</span></td>
+<td class="p-2 border">${t.from_name || '-'}<br><span class="text-gray-400 text-xs">${t.from_account || ''}</span></td>
+<td class="p-2 border">${t.to_name || '-'}<br><span class="text-gray-400 text-xs">${t.to_account || ''}</span></td>
+<td class="p-2 border text-right font-medium">${formatRupiah(t.amount)}</td>
+<td class="p-2 border">${t.description || '-'}</td>
+</tr>`).join('') || '<tr><td colspan="7" class="p-4 text-center text-gray-400">Tidak ada transaksi pada periode ini</td></tr>'}
+</tbody>
+</table>
+</div>
+<div class="mt-6 bg-gray-50 rounded-xl p-4">
+<h4 class="font-bold mb-3">Ringkasan:</h4>
+<div class="grid grid-cols-3 gap-4 text-sm">
+<div><p class="text-gray-500">Total Setor Tunai:</p><p class="font-bold text-green-600 text-lg">${formatRupiah(totalSetor)}</p></div>
+<div><p class="text-gray-500">Total Tarik Tunai:</p><p class="font-bold text-red-600 text-lg">${formatRupiah(totalTarik)}</p></div>
+<div><p class="text-gray-500">Total Transfer:</p><p class="font-bold text-blue-600 text-lg">${formatRupiah(totalTransfer)}</p></div>
+</div>
+</div>
+<div class="mt-12 flex justify-end">
+<div class="text-center w-48">
+<p class="text-sm text-gray-700 mb-16">Kerinci, ${new Date().toLocaleDateString('id-ID')}<br>Petugas Pencetak,</p>
+<p class="font-bold text-gray-800 underline">${currentUser?.name || 'Petugas'}</p>
+<p class="text-xs text-gray-500 capitalize">${currentUser?.role || 'Staff'}</p>
+</div>
+</div>
+<div class="mt-6 flex justify-end gap-3 print-hide">
+<button onclick="closeModal()" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200">Tutup</button>
+<button onclick="window.print()" class="px-6 py-2 bg-purple-500 text-white rounded-xl hover:bg-purple-600">Cetak</button>
+</div>
+</div>`;
+showModal(content, '4xl');
+};
+
+// ==================== DATA HANDLER & REALTIME SYNC ====================
+const softUpdateUI = () => {
+if (currentUser?.role === 'nasabah') {
+const dashBalance = document.getElementById('nasabah-dashboard-balance');
+if (dashBalance) dashBalance.innerText = formatRupiah(currentUser.balance);
+const tfBalance = document.getElementById('nasabah-transfer-balance');
+if (tfBalance) tfBalance.innerText = formatRupiah(currentUser.balance);
+const unreadCount = allData.filter(d => d.type === 'notification' && d.to_account === currentUser.phone && !d.read).length;
+const badge = document.getElementById('notif-badge');
+if (badge) {
+badge.innerText = unreadCount;
+badge.classList.toggle('hidden', unreadCount === 0);
+badge.classList.toggle('flex', unreadCount > 0);
+}
+} else {
+const pendingCount = getPendingNasabah().length;
+const staffBadge = document.getElementById('staff-notif-badge');
+if (staffBadge) {
+staffBadge.innerText = pendingCount;
+staffBadge.classList.toggle('hidden', pendingCount === 0);
+staffBadge.classList.toggle('flex', pendingCount > 0);
+}
+}
+if (document.getElementById('modal-overlay')) return;
+const activeEl = document.activeElement;
+const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+if (isTyping) return;
+if (currentSubView === 'dashboard') {
+renderContent();
+} else if (currentSubView === 'history') {
+filterHistory();
+} else if (currentSubView === 'nasabah') {
+filterNasabah();
+} else if (['admin', 'teller', 'cs'].includes(currentSubView)) {
+renderContent();
+}
+};
+const dataHandler = {
+onDataChanged(data) {
+allData = data;
+invalidateDataCache();
+if (currentUser) {
+const updatedUser = allData.find(d => d.__backendId === currentUser.__backendId);
+if (updatedUser) {
+currentUser = updatedUser;
+} else {
+logout();
+return;
+}
+}
+if (currentView === 'dashboard') {
+softUpdateUI();
+}
+}
+};
+
+// ==================== POLLING & INIT ====================
+const startPolling = () => {
+let pollingInterval = null;
+const poll = () => {
+if (!currentUser) return;
+const doPoll = () => {
+if (typeof google !== 'undefined' && google.script && google.script.run) {
+google.script.run.withSuccessHandler(data => {
+const newHash = JSON.stringify(data);
+if (_lastDataHash !== newHash) {
+_lastDataHash = newHash;
+dataHandler.onDataChanged(data);
+}
+}).withFailureHandler(() => {}).getAllData();
+} else {
+const localData = JSON.parse(localStorage.getItem('bss_data') || '[]');
+const newHash = JSON.stringify(localData);
+if (_lastDataHash !== newHash) {
+_lastDataHash = newHash;
+dataHandler.onDataChanged(localData);
+}
+}
+};
+doPoll();
+};
+poll();
+pollingInterval = setInterval(() => {
+if (!document.hidden) poll();
+}, 5000);
+document.addEventListener('visibilitychange', () => {
+if (document.hidden) {
+if (pollingInterval) clearInterval(pollingInterval);
+} else {
+poll();
+pollingInterval = setInterval(() => { if (!document.hidden) poll(); }, 5000);
+}
+});
+};
+const init = async () => {
+    if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+            console.error('Failed to initialize Data SDK:', result.error);
+            document.getElementById('app').innerHTML = `
+            <div class="text-center p-8">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Koneksi Gagal</h3>
+                <p class="text-gray-600 mb-4">Gagal memuat database dari server.</p>
+                <button onclick="location.reload()" class="px-6 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600">Muat Ulang</button>
+            </div>`;
+        } else {
+            // 🔥 MODIFIKASI: Baca parameter URL (?page=nasabah / ?page=admin)
+            if (typeof google !== 'undefined' && google.script && google.script.url) {
+                google.script.url.getLocation(function(location) {
+                    window.loginMode = location.parameter.page || 'all';
+                    renderLogin();
+                    startPolling();
+                });
+            } else {
+                // Fallback untuk mode preview / lokal
+                const urlParams = new URLSearchParams(window.top ? window.top.location.search : window.location.search);
+                window.loginMode = urlParams.get('page') || 'all';
+                renderLogin();
+                startPolling();
+            }
+        }
+    }
+};
+
+// ==================== TELLER PIN MODAL ====================
+const showTellerPinModal = () => {
+return new Promise((resolve) => {
+const content = `
+<div class="p-6 text-center">
+<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">${getIcon('key')}</div>
+<h3 class="text-xl font-bold text-gray-800 mb-2">Masukkan PIN Teller</h3>
+<p class="text-gray-500 mb-6">Masukkan PIN 6 digit untuk konfirmasi transaksi tunai</p>
+<input type="password" id="teller-pin-input" maxlength="6" class="w-full px-4 py-3 border border-gray-200 rounded-xl text-center text-2xl tracking-widest focus:ring-2 focus:ring-amber-500" placeholder="• • • • • •" autocomplete="off">
+<div class="flex gap-3 mt-6">
+<button onclick="closeModal(); if(window._tellerPinResolve) { window._tellerPinResolve(null); window._tellerPinResolve = null; }" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50">Batal</button>
+<button id="btn-confirm-teller-pin" onclick="confirmTellerPin()" class="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600">Konfirmasi</button>
+</div>
+</div>`;
+showModal(content, 'sm');
+window._tellerPinResolve = resolve;
+setTimeout(() => {
+const pinInput = document.getElementById('teller-pin-input');
+if (pinInput) {
+pinInput.focus();
+pinInput.addEventListener('keypress', (e) => {
+if (e.key === 'Enter') confirmTellerPin();
+});
+}
+}, 100);
+});
+};
+const confirmTellerPin = () => {
+const pin = document.getElementById('teller-pin-input')?.value;
+if (window._tellerPinResolve) {
+window._tellerPinResolve(pin);
+window._tellerPinResolve = null;
+}
+closeModal();
+};
+
+// ==================== INIT ====================
+if (document.readyState === 'loading') {
+document.addEventListener('DOMContentLoaded', init);
+} else {
+init();
+}
+</script>
+</body>
+</html>
