@@ -7,7 +7,7 @@
  */
 
 // ==================== CONFIGURATION ====================
-const SPREADSHEET_ID = '1GrM1BLbAVPpRtJtYQbBK0qfTVEW-SqnEoZHhsgvQQz0';
+const SPREADSHEET_ID = '1-N1rKBcoqM-0qBXTkVV2uZGVY5xNOy2DkxOxv32zVKM';
 const SHEET_NAMES = ['users', 'transactions', 'settings', 'notifications'];
 const LOCK_TIMEOUT_MS = 15000; // Optimized: 15 detik
 const CACHE_TTL_SECONDS = 30; // Cache data read selama 30 detik
@@ -640,4 +640,13 @@ function handleDirectorLogin(username, password) {
     console.error('Director login error: ' + e.message);
     return { status: false, error: 'Terjadi kesalahan sistem: ' + e.message };
   }
+}
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('🧪 BSS Tests')
+    .addItem('Run All Tests', 'runAllTests')
+    .addItem('Run Integration Tests', 'runIntegrationTests')
+    .addItem('Quick Test', 'quickTest')
+    .addToUi();
 }
