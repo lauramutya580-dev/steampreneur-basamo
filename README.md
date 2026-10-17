@@ -24,12 +24,14 @@ Berikut adalah langkah yang dilakukan pengguna dari awal sampai akhir untuk alur
 
 ### Langkah
 
-1. Buka alamat berikut di browser: 
+1. Buka alamat berikut di browser :
+   https://docs.google.com/spreadsheets/d/1-N1rKBcoqM-0qBXTkVV2uZGVY5xNOy2DkxOxv32zVKM/edit?usp=sharing
 
+2. 
 
 ### Akun atau data contoh
 
-link. data base spreadsheets: https://docs.google.com/spreadsheets/d/1-N1rKBcoqM-0qBXTkVV2uZGVY5xNOy2DkxOxv32zVKM/edit?usp=sharing
+link. data base spreadsheets:
 
 login untuk data awal, berikut data contoh :
 
