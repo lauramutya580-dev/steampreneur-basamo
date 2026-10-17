@@ -25,9 +25,7 @@ Berikut adalah langkah yang dilakukan pengguna dari awal sampai akhir untuk alur
 ### Langkah
 
 1. Buka alamat berikut di browser: 
-LOGIN untuk staff   : steampreneur-basamo-staff.blogspot.com / https://script.google.com/macros/s/AKfycbxedUBWRmN7ares8g512yFmtRU-_20VSd0DpQBwprhBcHMmZBRHC22HcoDTlgNQ1PCFRg/exec?page=admin
 
-LOGIN untuk nasabah : steampreneur-basamo-nasabah.blogspot.com / https://script.google.com/macros/s/AKfycbxedUBWRmN7ares8g512yFmtRU-_20VSd0DpQBwprhBcHMmZBRHC22HcoDTlgNQ1PCFRg/exec?page=nasabah
 
 ### Akun atau data contoh
 
@@ -101,6 +99,12 @@ Berikut adalah beberapa hal yang belum bisa dilakukan, masih memiliki keterbatas
 - **Akad Syariah Sederhana**: Fitur perhitungan bagi hasil otomatis (Akad Mudharabah) belum diimplementasikan. Sistem tabungan saat ini masih berbasis titipan murni (Akad Wadiah) tanpa mekanisme perhitungan bunga atau bagi hasil.
 - **Audit Log Terbatas**: Pencatatan aktivitas sensitif (seperti login atau reset password) masih bersifat dasar (hanya menyimpan `timestamp` di dalam JSON). Belum ada modul *audit log* terpusat yang mendetail (misalnya pelacakan IP address atau riwayat perubahan spesifik per kolom).
 - **Kapasitas Data**: Meskipun sudah dioptimasi dengan *batch operation* dan *cache*, performa pembacaan data mungkin akan mulai menurun jika jumlah baris data di Google Sheets melebihi 10.000 - 20.000 baris. Migrasi ke database relasional (seperti Cloud SQL) disarankan jika skala pengguna membesar.
+
+## Link Demo 
+
+1. LOGIN untuk staff   : https://script.google.com/macros/s/AKfycbxedUBWRmN7ares8g512yFmtRU-_20VSd0DpQBwprhBcHMmZBRHC22HcoDTlgNQ1PCFRg/exec?page=admin
+
+2. LOGIN untuk nasabah : https://script.google.com/macros/s/AKfycbxedUBWRmN7ares8g512yFmtRU-_20VSd0DpQBwprhBcHMmZBRHC22HcoDTlgNQ1PCFRg/exec?page=nasabah
 
 
 ## Sumber dan Lisensi
