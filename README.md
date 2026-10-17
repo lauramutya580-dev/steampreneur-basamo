@@ -26,9 +26,24 @@ Berikut adalah langkah yang dilakukan pengguna dari awal sampai akhir untuk alur
 
 1. Buka alamat berikut di browser :
    https://docs.google.com/spreadsheets/d/1-N1rKBcoqM-0qBXTkVV2uZGVY5xNOy2DkxOxv32zVKM/edit?usp=sharing
-
-2. 
-
+2. Lalu klik **Ekstensi**
+3. setelah itu klik **Apps Script** seperti gambar di bawah ini  
+![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-database/database-1.png)
+4. Maka ajkan muncul di halaman **Project Apps Script** seperti gambar di bawah ini
+5. kemudian klik **Terapkan** stelah itu klik **Deployment Baru** 
+![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-database/database-2.png)   
+6. kemudian Klik Izinkan Akses
+![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-database/database-4.png)
+7. maka akan muncul seperti gambar di bawah ini, setelh itu klik **hide advanced** lalu klik **Go To Project tak berjudul (unsafe)**
+![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-database/database-5.png)
+8. klik Continue seperti gambar di bawah ini
+![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-database/database-6.png)
+9. setelah itu muncul halaman Deploymen baru seperti di gambar kemudian salin URL
+![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-database/database-7.png)
+10. Setelah itu Paste kan Di hamalam pencarian baru seperti di gambar
+![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-database/database-8.png)
+11. aplikasi siap di gunakan
+![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-database/database-9.png)
 ### Akun atau data contoh
 
 link. data base spreadsheets:
