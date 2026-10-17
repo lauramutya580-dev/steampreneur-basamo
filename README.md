@@ -50,11 +50,17 @@ Minimal satu tangkapan layar untuk setiap langkah alur inti, termasuk hasil chan
 ## Fitur
 
 ### Keamanan & Autentikasi
-- **Multi-Role Access Control**: 5 peran berbeda (Direktur, Admin, Teller, CS, Nasabah) dengan hak akses menu yang terpisah dan terkontrol.
-- **Dual Portal Login**: URL terpisah untuk Portal Nasabah (`?page=nasabah`) dan Portal Admin/Staff (`?page=admin`) guna mencegah login silang.
-- **PIN 6 Digit & Blokir Otomatis**: Validasi PIN wajib untuk transaksi transfer dan tunai. Akun otomatis terblokir setelah 3x salah memasukkan PIN.
-- **Reset Password & PIN**: Admin dapat mereset password/PIN nasabah atau Teller ke default `123456` sekaligus membuka blokir akun secara instan.
-- **Optimistic Locking**: Mencegah konflik data (*race condition*) saat dua pengguna mengedit data yang sama secara bersamaan (berbasis field `__version`).
+
+- **Locking Mechanism (LockService)**: Menggunakan `LockService.getScriptLock()` dengan timeout dan retry logic (exponential backoff) pada operasi kritis (create, update, delete, transfer) untuk mencegah *race condition* yang dapat menyebabkan korupsi data atau saldo ganda.
+- **Optimistic Locking (Version Control)**: Setiap baris data memiliki field `_version`. Sistem memvalidasi `expectedVersion !== currentVersion + 1` saat update; jika tidak cocok, update ditolak dengan pesan "Data mungkin telah diubah" untuk mencegah *overwrite* tidak sengaja.
+- **Multi-Role Access Control (RBAC)**: 5 peran berbeda (Direktur, Admin, Teller, CS, Nasabah) dengan hak akses menu yang terpisah dan terkontrol. Setiap fitur (sidebar, tombol cetak, tombol hapus) dirender berdasarkan `currentUser.role`.
+- **Dual Portal Login**: URL terpisah untuk Portal Nasabah (`?page=nasabah`) dan Portal Admin/Staff (`?page=admin`) guna mencegah login silang. Sistem memblokir login jika status akun adalah *pending*, *inactive*, atau *blocked*.
+- **Validasi PIN 6 Digit & Blokir Otomatis**: Nasabah wajib memasukkan PIN 6 digit yang benar untuk transfer. Akun Teller otomatis diblokir (`blocked: true`) setelah 3x salah memasukkan PIN. Admin dapat mereset PIN ke default `123456` sekaligus membuka blokir akun secara instan.
+- **Batas Transfer Harian**: Sistem membatasi jumlah transfer per hari berdasarkan kategori nasabah (Pelajar vs Umum) sesuai pengaturan di menu Settings.
+- **Atomic Transaction (Transfer Atomik)**: Proses transfer dirancang secara atomik (`handleAtomicTransfer`) — validasi saldo, kurangi saldo pengirim, tambah saldo penerima. Jika gagal di tengah jalan, sistem melakukan *rollback* agar saldo tidak hilang atau muncul tiba-tiba. Mencegah duplikasi transaksi via `sessionStorage` (*double-click prevention*).
+- **Validasi & Sanitasi Input**: Validasi ketat menggunakan Regex untuk Nomor HP (`/^08\d{8,12}$/`) dan PIN 6 digit (`/^\d{6}$/`). Memblokir transfer ke diri sendiri. Pengecekan `sender.balance < amount` dilakukan di sisi backend sebelum transaksi diproses.
+- **Manajemen Cache yang Aman (Cache Invalidation)**: Data dibaca dari `CacheService` untuk kecepatan, namun setiap operasi tulis (Create/Update/Delete) memanggil `invalidateCache_()` untuk mencegah *stale data* disajikan ke pengguna.
+- **Penyimpanan Kredensial Direktur**: Kredensial login Direktur (`DIRECTOR_USERNAME`, `DIRECTOR_LOGIN_PASSWORD`, `DIRECTOR_DB_PASSWORD`) disimpan di sisi backend (`kode.gs`), bukan di-*hardcode* dalam frontend HTML, sehingga tidak mudah dibaca melalui *Inspect Element* browser.
 
 ### Manajemen Nasabah
 - **Registrasi Mandiri Nasabah**: Siswa dapat mendaftar sendiri via portal dengan status `pending` hingga disetujui oleh Admin/CS.
