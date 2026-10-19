@@ -1,4 +1,4 @@
-# 💬 03 - Log Prompt
+#  03 - Log Prompt
 
 **Alat AI yang dipakai:** Qwen, Gemini Pro
 **Catatan:** Hanya mencatat prompt penting (menghasilkan kode utama, ditolak/diperbaiki, dan debugging).
@@ -6,7 +6,7 @@
 
 ---
 
-##  Tabel Log Prompt
+## Tabel Log Prompt
 
 | No | Waktu | Langkah ke- | Prompt (ringkas & sanitized) | Hasil dari AI | Keputusan tim (diterima / diubah / ditolak) dan alasannya | Commit Fix |
 |----|-------|-----------|------------------------------|--------------|----------------------------------------------------------|------------|
@@ -21,7 +21,7 @@
 
 ---
 
-## 📝 Evaluasi Penggunaan AI
+## Evaluasi Penggunaan AI
 
 ### Kelebihan AI dalam Proyek Ini:
 
@@ -43,7 +43,7 @@ AI digunakan sebagai **Co-pilot, bukan Auto-pilot**. Setiap kode yang dihasilkan
 
 ---
 
-## 🔒 Catatan Keamanan Prompt
+## Catatan Keamanan Prompt
 
 - Tidak ada password, PIN, atau kredensial asli yang dimasukkan ke dalam prompt
 - Nomor HP yang digunakan dalam prompt adalah nomor dummy (contoh: `081234567890`)
