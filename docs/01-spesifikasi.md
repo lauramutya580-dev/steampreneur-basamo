@@ -9,8 +9,6 @@
 | Versi | 2.0.0 - Production Ready |
 | Tanggal | 15 Oktober 2026 |
 | Lokasi | SMKN 2 Kerinci |
-| Lisensi | MIT License (untuk kode), CC BY-SA 4.0 (untuk dokumentasi) |
-| Sumber Data | Wawancara langsung, observasi lapangan, studi literatur sistem perbankan syariah |
 
 ## Alur Inti yang Dibangun
 
@@ -124,7 +122,7 @@ Siswa dan seluruh ekosistem SMKN 2 Kerinci membutuhkan sistem bank sekolah digit
 
 | No | Fitur | Deskripsi |
 |----|-------|-----------|
-| 11 | Transfer Antar Nasabah (Atomic) | Transfer dengan validasi PIN, batas harian berbeda (Pelajar: Rp500.000 / Umum: Rp2.000.000) |
+| 11 | Transfer Antar Nasabah (Atomic) | Transfer dengan validasi PIN, batas harian berbeda (Pelajar: Rp20.000 / Umum: Rp500.000) |
 | 12 | Setor & Tarik Tunai via Teller | Teller wajib input PIN sebelum memproses transaksi tunai |
 | 13 | Anti-Duplikasi Transaksi | Sistem mencegah double submission saat user klik tombol 2x |
 | 14 | Auto-Rollback | Jika update saldo gagal, transaksi otomatis dihapus (mencegah data tidak konsisten) |
@@ -184,8 +182,8 @@ Siswa dan seluruh ekosistem SMKN 2 Kerinci membutuhkan sistem bank sekolah digit
 
 ### B. Aturan Transaksi
 
-- **Limit Transfer Harian Nasabah Pelajar:** Maksimal Rp500.000/hari (configurable via menu Pengaturan)
-- **Limit Transfer Harian Nasabah Umum:** Maksimal Rp2.000.000/hari (configurable via menu Pengaturan)
+- **Limit Transfer Harian Nasabah Pelajar:** Maksimal Rp20.000/hari (configurable via menu Pengaturan)
+- **Limit Transfer Harian Nasabah Umum:** Maksimal Rp500.000/hari (configurable via menu Pengaturan)
 - **Validasi Transfer:** Tidak dapat transfer ke rekening sendiri. Saldo pengirim harus ≥ jumlah transfer
 - **Atomic Transfer:** Jika update saldo penerima gagal, saldo pengirim otomatis di-rollback (dengan increment `__version` yang benar)
 - **Anti-Duplikasi:** Sistem menolak request transaksi ganda dalam sesi yang sama via `sessionStorage` tracking
@@ -213,7 +211,7 @@ Siswa dan seluruh ekosistem SMKN 2 Kerinci membutuhkan sistem bank sekolah digit
 |------|-----------|-----------------|
 | **Users** (Nasabah, Teller, Admin, CS, Direktur) | `{type: 'user', username: '081234567890', password: '***', pin: '123456', name: 'Melsa Aulia', phone: '081234567890', role: 'nasabah', category: 'pelajar', kelas: 'XI AKL 1', balance: 150000, status: 'active', pin_attempts: 0, blocked: false, created_at: '2026-10-15T...'}` | Google Sheets (Sheet: `users`) — kolom: `__backendId`, `Data_JSON`, `__version`, `__timestamp` |
 | **Transactions** (Setor, Tarik, Transfer) | `{type: 'transaction', transaction_type: 'transfer', amount: 50000, from_account: '081234567890', to_account: '081234567899', from_name: 'Melsa', to_name: 'Gresia', description: 'Uang kas kelompok', teller_name: '-', created_at: '2026-10-15T...'}` | Google Sheets (Sheet: `transactions`) |
-| **Settings** (Konfigurasi Sistem) | `{type: 'settings', max_transfer_pelajar: 500000, max_transfer_umum: 2000000}` | Google Sheets (Sheet: `settings`) |
+| **Settings** (Konfigurasi Sistem) | `{type: 'settings', max_transfer_pelajar: 20000, max_transfer_umum: 500000}` | Google Sheets (Sheet: `settings`) |
 | **Notifications** (Pengumuman & Pesan) | `{type: 'notification', to_account: '081234567890', message: 'Libur nasional besok', read: false, sender: 'Admin BSS', created_at: '2026-10-15T...'}` | Google Sheets (Sheet: `notifications`) |
 
 **Struktur Tabel Google Sheets:** Setiap sheet memiliki 4 kolom standar:
@@ -241,7 +239,7 @@ Setiap kriteria harus bisa diuji (bisa dijawab ya atau tidak).
 - [x] Teller wajib memasukkan PIN 6 digit sebelum memproses transaksi tunai
 - [x] Nasabah dapat transfer ke nasabah lain, saldo kedua pihak terupdate, dan tercatat di riwayat
 - [x] Sistem menolak transfer ke rekening sendiri
-- [x] Sistem menolak transfer jika total harian nasabah pelajar melebihi Rp500.000 (atau limit yang dikonfigurasi)
+- [x] Sistem menolak transfer jika total harian nasabah pelajar melebihi Rp20.000 (atau limit yang dikonfigurasi)
 - [x] Atomic rollback berjalan: jika update saldo penerima gagal, saldo pengirim kembali ke nilai semula
 - [x] Anti-duplikasi berjalan: klik tombol transaksi 2x cepat hanya memproses 1 transaksi
 
@@ -274,29 +272,6 @@ Setiap kriteria harus bisa diuji (bisa dijawab ya atau tidak).
 
 ---
 
-## 9. Keterkaitan dengan STEAM
-
-| Unsur STEAM | Implementasi dalam BSS |
-|-------------|----------------------|
-| **Science (Sains)** | Analisis perilaku finansial siswa berdasarkan data transaksi; studi literasi keuangan syariah; pemahaman akad Wadiah (titipan murni) |
-| **Technology (Teknologi)** | Google Apps Script, Google Sheets API, Tailwind CSS, Vanilla JS, Optimistic Locking, Cache Management, Real-time Polling |
-| **Engineering (Rekayasa)** | Arsitektur sistem client-server, atomic transaction dengan rollback, request queue pattern, batch operations untuk optimasi API calls |
-| **Art (Seni/Desain)** | UI/UX mobile-first untuk nasabah, desktop-first untuk staff; desain responsif dengan Tailwind CSS; CSS print multi-page A4 yang rapi |
-| **Mathematics (Matematika)** | Perhitungan saldo, limit transfer harian, statistik dashboard (total, rata-rata, tertinggi), pagination, sorting algorithm |
-
----
-
-## 10. Sumber dan Referensi
-
-1. **Wawancara Langsung:** Melsa Aulia, Gresia Ezinda Putri, Bu Usdekawati S.Pd, Ibu Isil, Bu Yuni (Oktober 2026)
-2. **Observasi Lapangan:** Bank Mini SMKN 2 Kerinci dan Kantin Sekolah (Hari ke-2 logbook)
-3. **Dokumentasi Google Apps Script:** https://developers.google.com/apps-script
-4. **Dokumentasi Tailwind CSS:** https://tailwindcss.com/docs
-5. **Prinsip Perbankan Syariah:** Akad Wadiah (titipan murni) - referensi dari materi jurusan AKL SMKN 2 Kerinci
-6. **Design Pattern:** Optimistic Locking, Request Queue, Debounce - referensi dari literatur software engineering
-
----
-
 ## 📎 Lampiran
 
 ### A. Tabel Audit Fitur (Mapping Pain Point → Solusi)
@@ -304,7 +279,7 @@ Setiap kriteria harus bisa diuji (bisa dijawab ya atau tidak).
 | No | Pain Point (Masalah) | Narasumber | Solusi Fitur BSS |
 |----|---------------------|-----------|-----------------|
 | 1 | Antrean panjang & buku tabungan fisik hilang/rusak | Melsa, Bu Usdekawati | Registrasi Mandiri + Virtual Account (No. HP = No. Rekening) — Eliminasi buku fisik |
-| 2 | Uang saku cepat habis / Impulsive spending | Gresia | Batas Transfer Harian (Pelajar: Rp500rb) + Riwayat Transaksi Real-time untuk self-monitoring |
+| 2 | Uang saku cepat habis / Impulsive spending | Gresia | Batas Transfer Harian (Pelajar: Rp20rb) + Riwayat Transaksi Real-time untuk self-monitoring |
 | 3 | Kesulitan rekap uang kas kelompok | Melsa | Transfer Antar Nasabah (Atomic) — bisa kirim uang ke teman sekelas secara digital |
 | 4 | Rekonsiliasi data rawan human error & buta data | Bu Usdekawati | Dashboard Real-time + Cetak Riwayat Transaksi + Cetak Rekening Koran per periode |
 | 5 | Cemas uang tunai hilang & ingin memantau anak | Ibu Isil | Notifikasi Real-time + Broadcast + Top-up via Transfer (tanpa tunai fisik) |
@@ -327,8 +302,8 @@ Setiap kriteria harus bisa diuji (bisa dijawab ya atau tidak).
 
 ### C. Jurnal Penggunaan AI
 
-| Tools AI | Tujuan | Prompt (Sanitized) | Output | Validasi Tim |
-|----------|--------|-------------------|--------|-------------|
+| Tools AI | Tujuan | Prompt | Output | Validasi Tim |
+|----------|--------|--------|--------|-------------|
 | Gemini / Qwen | Implementasi kode BSS | "Buatkan sistem bank sekolah dengan 27 fitur" | Kode `kode.gs` & `Index.html` lengkap | Testing fitur atomic transfer & locking |
 
 ### D. Spesifikasi Teknis Sistem BSS
@@ -345,5 +320,5 @@ Setiap kriteria harus bisa diuji (bisa dijawab ya atau tidak).
 | Real-time | Polling setiap 5 detik + Visibility API (pause saat tab hidden) |
 | Mobile Support | Responsive UI khusus nasabah (bottom navigation) |
 | Cetak | Multi-page A4 support dengan CSS khusus |
-| Lisensi Kode | MIT License |
-| Lisensi Dokumentasi | CC BY-SA 4.0 |
+
+**Catatan:** Semua kriteria di atas telah diverifikasi melalui 14 test case formal (lihat `docs/04-kasus-uji.md`) dan 5 bug fix yang didokumentasikan di `docs/catatan-bug.md`.
