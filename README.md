@@ -59,10 +59,8 @@ login untuk data awal, berikut data contoh :
 
 ## Tangkapan Layar Alur Inti
 
-Minimal satu tangkapan layar untuk setiap langkah alur inti, termasuk hasil change request. Simpan gambar di `docs/bukti/`.
-
-1. Halaman Login Nasabah : https://drive.google.com/file/d/1V_2cNWlY2wDsz8WCUVj4sc-s3FiYnIxw/view?usp=drive_link   
-2. Dasboard Nasabah      : https://drive.google.com/file/d/1V0IsnXC8TVpc1QnYbISqCXU_6OphvKpX/view?usp=sharing 
+1. Halaman Login admin/staff  : ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-aplikasi/aplikasi-1.png)
+2. Halaman Login Nasabah      : ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-aplikasi/aplikasi-2.png)
 
 ## Cara Menjalankan Pengujian
 
