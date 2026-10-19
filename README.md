@@ -29,7 +29,7 @@ Berikut adalah langkah yang dilakukan pengguna dari awal sampai akhir untuk alur
 2. Lalu klik **Ekstensi**
 3. setelah itu klik **Apps Script** seperti gambar di bawah ini  
 ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-database/database-1.png)
-4. Maka ajkan muncul di halaman **Project Apps Script** seperti gambar di bawah ini
+4. Maka akan muncul di halaman **Project Apps Script** seperti gambar di bawah ini
 5. kemudian klik **Terapkan** stelah itu klik **Deployment Baru** 
 ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-database/database-2.png)   
 6. kemudian Klik Izinkan Akses
@@ -46,8 +46,6 @@ Berikut adalah langkah yang dilakukan pengguna dari awal sampai akhir untuk alur
 ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-database/database-9.png)
 ### Akun atau data contoh
 
-link. data base spreadsheets:
-
 login untuk data awal, berikut data contoh :
 
 | Peran     | Username      | Password  |
@@ -63,6 +61,15 @@ Minimal satu tangkapan layar untuk setiap langkah alur inti, termasuk hasil chan
 
 1. Halaman Login Nasabah : https://drive.google.com/file/d/1V_2cNWlY2wDsz8WCUVj4sc-s3FiYnIxw/view?usp=drive_link   
 2. Dasboard Nasabah      : https://drive.google.com/file/d/1V0IsnXC8TVpc1QnYbISqCXU_6OphvKpX/view?usp=sharing 
+
+## Cara Menjalankan Pengujian
+
+### Langkah 
+1. pada halaman **Project Apps Script** seperti gambar di bawah ini
+   kemudian klik **test.gs** stelah itu klik **runAlltests** 
+![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-test/Bukti-test1.jpg)
+2. Setelh itu klik **Jalankan*** seperti gambar di bawah ini, kemudian tunggu sampai prosesnya selesai   
+![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-test/Bukti-test2.png)
 
 ## Fitur
 
