@@ -59,12 +59,13 @@ login untuk data awal, berikut data contoh :
 
 ## Tangkapan Layar Alur Inti
 
-1. Halaman Login admin/staff  : ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-aplikasi/aplikasi-1.png)
-2. Halaman Login Nasabah      : ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-aplikasi/aplikasi-2.png)
+1. Halaman Login admin/staff   ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-aplikasi/aplikasi-1.png)
+2. Halaman Login Nasabah       ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-aplikasi/aplikasi-2.png)
 3. dahboard admin ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-aplikasi/dashboard%20direktur%20dan%20admin.png)
 4. dahboard teller ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-aplikasi/dashboard%20teller.png)
 5. dahboard costumer service (CS) ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-aplikasi/dashboard%20cs.png)
-
+6. dahboard nasabah ![alt text](https://github.com/lauramutya580-dev/steampreneur-basamo/blob/main/docs/Bukti-aplikasi/dahboard%20nasabah.png)
+   
 ## Cara Menjalankan Pengujian
 
 ### Langkah 
