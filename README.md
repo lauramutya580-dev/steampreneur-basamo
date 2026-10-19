@@ -52,6 +52,8 @@ login untuk data awal, berikut data contoh :
 |-----------|---------------|-----------|
 | direktur  | direktur      | direktur123 |
 | admin     | admin01       | 123456    |
+| teller1   | teller1       | 123456    |
+| cs        | cs            | 123456    |
 | nasabah   | 082177903994  | 123456    |
 
 
