@@ -1,17 +1,9 @@
 # ==========================================
-# BSS - Bank Syariah Sekolah .gitignore
+# BSS - Bank Syariah Sekolah (BASAMO)
 # ==========================================
 
-# 1. Dependensi dan hasil build (jangan diunggah)
-node_modules/
-vendor/
-dist/
-build/
-.next/
-.cache/
-.clasp/
-
-# 2. File rahasia: password, API key, token, kredensial
+# --- 1. File Rahasia & Kredensial (WAJIB DI-IGNORE) ---
+# Memastikan tidak ada data sensitif yang ter-upload ke repositori
 .env
 .env.*
 !.env.example
@@ -20,19 +12,31 @@ token.json
 service-account.json
 *.key
 *.pem
+secrets/
 
-# 3. File sistem, OS, dan editor
+# --- 2. Google Apps Script & Clasp Specific ---
+# File konfigurasi lokal CLASP dan backup
+.clasp/
+.claspignore
+appsscript.json.bak
+*.gs~
+
+# --- 3. Sistem Operasi, Editor, & IDE ---
+# Mencegah file sampah dari OS dan code editor masuk ke repo
 .DS_Store
+.DS_Store?
 Thumbs.db
 desktop.ini
-*.log
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# 4. Google Apps Script & Clasp specific (jika menggunakan CLI Clasp)
-.claspignore
-appsscript.json.bak
-*.gs~
+# --- 4. Log, Cache, & Build Lokal ---
+# File sementara yang tidak perlu di-versioning
+*.log
+.cache/
+test-results/
+
+# ==========================================
