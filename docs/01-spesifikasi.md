@@ -163,7 +163,7 @@ Siswa dan seluruh ekosistem SMKN 2 Kerinci membutuhkan sistem bank sekolah digit
 ## 5. Di Luar Cakupan (Tidak Dikerjakan dalam Challenge Ini)
 
 - [ ] Integrasi dengan Payment Gateway eksternal (QRIS, Virtual Account Bank Nasional, Dana, OVO)
-- [ ] Aplikasi Native (Android/iOS) — saat ini berbasis Web (Mobile-first PWA-ready)
+- [ ] Aplikasi Native (Android/iOS) — saat ini berbasis Web
 - [ ] Perhitungan bagi hasil otomatis (Akad Mudharabah) — saat ini masih berbasis titipan murni (Akad Wadiah)
 - [ ] Fitur Chat langsung antara nasabah dan Customer Service (hanya notifikasi satu arah)
 - [ ] Integrasi dengan sistem akademik sekolah (Dapodik/SIM Sekolah)
